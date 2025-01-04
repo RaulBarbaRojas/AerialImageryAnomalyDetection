@@ -1,0 +1,22 @@
+---
+version: 0.1.0-dev
+
+datasets:
+  - name: AirbusShipDetectionRawDataset
+    folder: 'data/download/airbus-ship-detection'
+    params:
+      img_width: 768
+      img_height: 768
+
+jobs:
+  - name: Preprocess Airbus Ship Detection
+    dataset: AirbusShipDetectionRawDataset
+    params:
+      output_dataset_folder: 'data/processed/airbus-ship-detection'
+    steps:
+      - name: Calculate Ship Masks
+        python-module: aerial_anomaly_detection.preprocess.mask_generation.airbus_ship_detection
+        params:
+          mask_output_folder: '{output_dataset_folder}/full_masks'
+        if:
+          not_file: '{output_dataset_folder}/index.csv'

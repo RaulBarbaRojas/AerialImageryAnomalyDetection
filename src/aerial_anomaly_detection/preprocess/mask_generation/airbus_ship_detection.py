@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from typing import List, Tuple
 
+import cv2
 import numpy as np
 import pandas as pd
 from afml.context import run_ctx
@@ -35,7 +36,7 @@ def rle_ship_encoding_to_mask(rle_encoding : str, img_width : int, img_height : 
 
         # Step 3: Generate the mask from the encodings
         for idx_pixel_row in range(0, len(rle_encoding), 2):
-            start_index = rle_encoding[idx_pixel_row]
+            start_index = rle_encoding[idx_pixel_row] - 1
             pixel_length = rle_encoding[idx_pixel_row + 1]
             mask[start_index:start_index + pixel_length] = 255
 
@@ -59,11 +60,11 @@ if __name__ == '__main__':
                     file = sys.stdout,
                     dynamic_ncols = True):
         img_name = getattr(row, 'ImageId')
-        mask_name = f'{img_name.split('.')[0]}.bin'
+        mask_name = img_name.replace('.jpg', '.png')
 
         # Step 2.1: Create mask file
         mask = rle_ship_encoding_to_mask(getattr(row, 'EncodedPixels'), img_width, img_height)
-        mask.tofile(mask_folder / mask_name)
+        cv2.imwrite(mask_folder / mask_name, mask)
 
         # Step 2.2: Write metadata
         mask_data.append((img_name, (mask_folder / mask_name).relative_to(mask_folder.parent)))

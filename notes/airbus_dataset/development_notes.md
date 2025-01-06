@@ -1,4 +1,4 @@
-# Day 1: 02-01-2025
+## Day 1: 02-01-2025
 
 We will be using the Airbus Ship Detection dataset which can be found in [Kaggle](https://www.kaggle.com/competitions/airbus-ship-detection). This dataset contains two different pieces of information:
 
@@ -8,7 +8,7 @@ We will be using the Airbus Ship Detection dataset which can be found in [Kaggle
 
 Since the dataset is used for academic purposes, completely allowed and supported by their creators as shown in the [license](https://www.kaggle.com/competitions/airbus-ship-detection), information related to the submission will not be used. Conversely, the training information will be used to obtain: (I) satellite imagery of seas and oceans without ships, which will be used as the "non-anomalous" samples of data; and (II) satellite imagery of seas and oceans including images with and without ships. This split of data allows us to train anomaly detection models, evaluating their goodness on known, ground truth, satellite imagery. For this reason, the original training dataset will be divided into three different partitions: train, validation and test. The first partition will be used for training the models, the second one will be used for deciding the best hyperparameters for the models, and the latter will be used for evaluating their goodness. This decision looks optimal because the datasets employed are big, thus there is enough information for training the models and evaluating them in an honest manner.
 
-# Day 2: 03-01-2025
+## Day 2: 03-01-2025
 
 Another relevant aspect to be considered is the required preprocessing in the data. Regarding the Airbus Ship Detection dataset, several preprocessing steps are required to maximise the quality of the data to be used for training models:
 
@@ -19,3 +19,25 @@ Another relevant aspect to be considered is the required preprocessing in the da
 * **Mask calculation**: furthermore, the input dataset only provides information about the borders of each ship. While such information is useful, ship masks are required, so that tiles can be split into tiles without ships (non-anomalous) and tiles with ships (anomalous).
 
 With all this in mind, the development started by using the AFML framework to create a basic pipeline that could apply these preprocessing steps automatically. The introduction of MLOps frameworks, such as Automation Framework for Machine Learning ([AFML](https://github.com/AlbertoVelascoMata/afml)), is the quality improvement of the resulting models, even in production environments [AI-powered DevOps and MLOps frameworks: Enhancing collaboration, automation, and scalability in machine learning pipelines].
+
+## Day 3: 04-1-2025
+
+Mask calculation was developed during this third day. However, a quick visualization of a small sample of images of the dataset showed a quality issue that could affect the performance of anomaly detection models: images include not only sea/ocean images, but also images with land, and even images without any water at all. While the availability of this information could help develop more robust models, the unavailability of the "land mask" does not allow the creation of a balanced dataset with sea and land images. As a result, it was decided to use this dataset when studying the limitations of the anomaly detection models, whereas the "MASATI (v2)" dataset was used to replace the airbus ship detection dataset, as it provides full control on the kind of images with which we can train the anomaly detection models.
+
+## Day 4: 06-01-2025
+
+The MASATI (v2) dataset was downloaded and the partitioning strategy was implemented. This strategy worked as follows:
+
+* **Train and validation partitions**: first, the train and validation partitions were obtained from the "water" sub-set of aerial images. Such sub-set of images only contains images with water, i.e. no land, and no ships. Indeed, the utilisation of this sub-set of images seems to be ideal for training anomaly detection models aimed at detecting ships through non-supervised anomaly detection methods.
+
+* **Test partition**: on the other hand, the test partition was obtained from the combination of the "ship" and "multi" sub-sets of images, which contain sea/ocean images with just one ship (in the former case) and multiple ships (in the latter case).
+
+The result of this partitioning is a *partitions.csv* file containing the path of the image (relative to the dataset folder), some metadata related to it (such as the width and height of the image), and the partition it belongs to.
+
+The application of this partitioning strategy allows us to use an *overlap tiling* strategy to further increase the number of images in the train partition. An *overlap tiling* strategy is that strategy by which an image of size CxHxW is converted into N CxH'xW' images, which are overlapped, i.e. two images may have a shared part in different locations of the image. The *overlap tiling* strategy, not implemented during this development day, allows the generation of more images from an original, relatively small, sub-set of images (as is the case with the MASATI v2 dataset, which is a rather small dataset). The *overlap tiling* strategy that will be implemented is based on picking up 3x128x128 images, with steps of 64 pixels at a time, both in the X and the Y axes of the image. As a result, the tiling strategy will work as follows:
+
+* First, an image of size 3x128x128 is obtained from the X = 0 and Y = 0 location.
+
+* Then, a step of 64 pixels is applied to the X axis (X = 64). Another 3x128x128 image is obtained from this new location (X = 64, Y = 0). It must be noted that the image mentioned in the previous step and the one mentioned in this step share a common portion of the image.
+
+* This process is repeated until a step is applied where X does not allow the obtention of a image of 3x128x128. In that case, the X location is reset to 0, and the Y location is increased by 64 (same step size). The full process would continue until both the X and Y locations do not allow for the generation of more images of size 3x128x128.

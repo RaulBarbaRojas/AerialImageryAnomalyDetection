@@ -8,15 +8,33 @@ datasets:
       img_width: 768
       img_height: 768
 
-jobs:
-  - name: Preprocess Airbus Ship Detection
-    dataset: AirbusShipDetectionRawDataset
+  - name: MASATIv2RawDataset
+    folder: 'data/download/MASATI-v2'
     params:
-      output_dataset_folder: 'data/processed/airbus-ship-detection'
+      img_width: 512
+      img_height: 512
+
+jobs:
+  # - name: Preprocess Airbus Ship Detection
+  #   dataset: AirbusShipDetectionRawDataset
+  #   params:
+  #     output_dataset_folder: 'data/processed/airbus-ship-detection'
+  #   steps:
+  #     - name: Calculate Ship Masks
+  #       python-module: aerial_anomaly_detection.preprocess.mask_generation.airbus_ship_detection
+  #       params:
+  #         mask_output_folder: '{output_dataset_folder}/full_masks'
+  #       if:
+  #         not_file: '{output_dataset_folder}/index.csv'
+
+  - name: Preprocess MASATI-v2 dataset
+    dataset: MASATIv2RawDataset
+    params:
+      output_dataset_folder: 'data/processed/MASATI-v2'
     steps:
-      - name: Calculate Ship Masks
-        python-module: aerial_anomaly_detection.preprocess.mask_generation.airbus_ship_detection
+      - name: Partition dataset into train/val/test partitions
+        python-module: aerial_anomaly_detection.preprocess.partition.masati_v2
         params:
-          mask_output_folder: '{output_dataset_folder}/full_masks'
+          train_size_pct: 0.85
         if:
-          not_file: '{output_dataset_folder}/index.csv'
+          not_file: '{output_dataset_folder}/partitions.csv'

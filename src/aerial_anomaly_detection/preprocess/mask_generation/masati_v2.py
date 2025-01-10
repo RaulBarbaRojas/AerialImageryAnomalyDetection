@@ -68,6 +68,7 @@ def generate_partition_masks(base_output_folder : str | Path,
     mask_metadata : List[Tuple[str, str]] = []
     base_output_folder = Path(base_output_folder)
     partitions_df = partitions_df[partitions_df['partition'] == partition]
+    (base_output_folder / partition).mkdir(exist_ok = True, parents = True)
 
     for row in tqdm(partitions_df.itertuples(),
                     total = partitions_df.shape[0],
@@ -77,8 +78,9 @@ def generate_partition_masks(base_output_folder : str | Path,
         mask = generate_mask_from_xml_annotation(img_to_annotation_fn(row.path),
                                                  row.width,
                                                  row.height)
-        cv2.imwrite(base_output_folder / Path(row.path).name, mask)
-        mask_metadata.append((row.path, (base_output_folder / Path(row.path).name).relative_to(base_output_folder.parent)))
+        mask_path = base_output_folder / partition / Path(row.path).name
+        cv2.imwrite(mask_path, mask)
+        mask_metadata.append((row.path, mask_path.relative_to(base_output_folder.parent)))
 
     return pd.DataFrame(mask_metadata, columns = ['path', 'mask_path'])
 

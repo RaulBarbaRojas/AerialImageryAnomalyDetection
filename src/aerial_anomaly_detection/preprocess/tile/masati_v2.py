@@ -40,10 +40,10 @@ if __name__ == '__main__':
         image_path = dataset_folder / row.path
         image_partition = row.partition
         image_data = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
-        (output_base_folder / image_partition).mkdir(exist_ok = True, parents = True)
+        (output_base_folder / image_partition / 'base').mkdir(exist_ok = True, parents = True)
 
         for tile, x_coord, y_coord in tiler.tile(image_data):
-            tile_path = output_base_folder / image_partition / f'{Path(row.path).stem}_x{x_coord}_y{y_coord}.png'
+            tile_path = output_base_folder / image_partition / 'base' / f'{Path(row.path).stem}_x{x_coord}_y{y_coord}.png'
             cv2.imwrite(tile_path, tile)
             tiling_metadata.append((tile_path.relative_to(output_base_folder),
                                     image_partition,

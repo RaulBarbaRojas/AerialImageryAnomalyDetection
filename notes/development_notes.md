@@ -41,3 +41,20 @@ The application of this partitioning strategy allows us to use an *overlap tilin
 * Then, a step of 64 pixels is applied to the X axis (X = 64). Another 3x128x128 image is obtained from this new location (X = 64, Y = 0). It must be noted that the image mentioned in the previous step and the one mentioned in this step share a common portion of the image.
 
 * This process is repeated until a step is applied where X does not allow the obtention of a image of 3x128x128. In that case, the X location is reset to 0, and the Y location is increased by 64 (same step size). The full process would continue until both the X and Y locations do not allow for the generation of more images of size 3x128x128.
+
+## Days 5 to 7: (until 10-01-2025 due to illness)
+
+Once images were split into train/val/test subsets, two processes followed:
+
+* First, images were tiled into smaller patches to (I) reduce memory consumption and (II) potentially improve the performance of the anomaly detection methods, as anomalies can be dilluted when images are large (dillution in loss).
+
+* Furthermore, masks were generated for all images. Training and validation images involve a mask where all pixels are 0, i.e. no ships, whereas test images include ship pixels.
+
+With all the preprocessing so far, only a few more steps were required for the dataset to be fully usable for training anomaly detection methods:
+
+* **Mask tiling**: similar to the images, masks must also be tiled so that patches can be fully utilised themselves. The same tiling must be applied so that the mask of the patch carefully relates to the patch itself, without any deviation.
+
+* **Stat calculation**: since data normalization techniques will be implemented to create more robust models, stats like training data mean (per colour channel) and scale (per colour channel too) must be computed, so that images can be normalised using only training information.
+
+* **DataLoader integration**: on the other hand, since PyTorch is used to implement all the anomaly detection methods, a class must be implemented to extend the dataset class of PyTorch, so that the dataset is iterable and can easily be used for training these anomaly detection methods in a simple way.
+

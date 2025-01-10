@@ -1,0 +1,1 @@
+# TODO: calculate stats, such as tile having ships or not, (ship pct // anomaly pct) etc.

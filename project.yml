@@ -38,3 +38,20 @@ jobs:
           train_size_pct: 0.85
         if:
           not_file: '{output_dataset_folder}/partitions.csv'
+
+      - name: Mask generation
+        python-module: aerial_anomaly_detection.preprocess.mask_generation.masati_v2
+        params:
+          mask_output_folder: '{output_dataset_folder}/full_masks'
+        if:
+          not_file: '{output_dataset_folder}/masks.csv'
+
+      - name: Divide images into smaller and overlapped tiles
+        python-module: aerial_anomaly_detection.preprocess.tile.masati_v2
+        params:
+          tile_x_size: 128
+          tile_y_size: 128
+          x_step: 64
+          y_step: 64
+        if:
+          not_file: '{output_dataset_folder}/index.csv'

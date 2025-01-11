@@ -55,3 +55,8 @@ jobs:
           y_step: 64
         if:
           not_file: '{output_dataset_folder}/index.csv'
+
+      - name: Stats calculation
+        python-module: aerial_anomaly_detection.preprocess.stats.masati_v2
+        if:
+          not_file: '{output_dataset_folder}/info.ini'

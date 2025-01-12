@@ -58,6 +58,10 @@ With all the preprocessing so far, only a few more steps were required for the d
 
 * **DataLoader integration**: on the other hand, since PyTorch is used to implement all the anomaly detection methods, a class must be implemented to extend the dataset class of PyTorch, so that the dataset is iterable and can easily be used for training these anomaly detection methods in a simple way.
 
-## Day 8: 11-01-2025 (still ill due to flu)
+## Day 8: 11-01-2025 (still ill due to the flu)
 
 The stats calculation task was developed during this day. The essence of this task was to develop the functionality that allows us to loop through all train images, calculating the mean and standard deviation of each color channel for any given dataset (only train information to prevent data leakage). With those two pieces of information, the normalization of patches is trivial, as a simple mean-scale normalization can be applied once both mean and scale are known.
+
+## Day 9: 12-01-2025 (still ill due to the flu)
+
+Tile normalization was implemented and tested during this day. The mean and scale information calculated the previous day were employed to generate binary files that corresponded to the normalized versions of the tiles. The index dataframe (index.csv) was updated to also include the path to the normalized binary file, so that it can be used by the class that will extend PyTorch datasets.

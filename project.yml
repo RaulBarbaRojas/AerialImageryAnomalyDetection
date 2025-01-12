@@ -60,3 +60,6 @@ jobs:
         python-module: aerial_anomaly_detection.preprocess.stats.masati_v2
         if:
           not_file: '{output_dataset_folder}/info.ini'
+
+      - name: Tile normalization
+        python-module: aerial_anomaly_detection.preprocess.norm.masati_v2

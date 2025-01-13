@@ -63,3 +63,6 @@ jobs:
 
       - name: Tile normalization
         python-module: aerial_anomaly_detection.preprocess.norm.masati_v2
+
+      - name: Mask tiling
+        python-module: aerial_anomaly_detection.preprocess.tile.mask_tiling_masati_v2

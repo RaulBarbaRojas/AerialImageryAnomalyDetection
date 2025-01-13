@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     # Step 2: Checking if normalized tiles have already been generated
     if 'norm_path' in index_df.columns:
-        print(f'Skipping step, normalized information already generated...')
+        print('Skipping step, normalized information already generated...')
         exit()
 
     # Step 3: Applying MeanScale normalization

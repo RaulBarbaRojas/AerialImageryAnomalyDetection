@@ -65,3 +65,8 @@ The stats calculation task was developed during this day. The essence of this ta
 ## Day 9: 12-01-2025 (still ill due to the flu)
 
 Tile normalization was implemented and tested during this day. The mean and scale information calculated the previous day were employed to generate binary files that corresponded to the normalized versions of the tiles. The index dataframe (index.csv) was updated to also include the path to the normalized binary file, so that it can be used by the class that will extend PyTorch datasets.
+
+## Day 10: 13-01-2025 (still ill due to the flu)
+
+During the 10th day of the development, mask tiling was implemented by making use of the already implemented "Overlapped tiler". Certain tiles were manually checked to guarantee the quality of the overall solution.
+

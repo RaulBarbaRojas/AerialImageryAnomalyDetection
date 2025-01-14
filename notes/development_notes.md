@@ -70,3 +70,8 @@ Tile normalization was implemented and tested during this day. The mean and scal
 
 During the 10th day of the development, mask tiling was implemented by making use of the already implemented "Overlapped tiler". Certain tiles were manually checked to guarantee the quality of the overall solution.
 
+## Day 11: 14-01-2025 (no more flu)
+
+During the 11th day of development, data access was guaranteed through the development of two classes: (I) a class that extended the functionalities of the dataset class of PyTorch, (II) and a class that extended the base functionalities of the PyTorch DataLoader. The latter was only required to also iterate over tile names and not only its data (img and mask). This development is thought to facilitate future developments.
+
+However, the implementation of an anomaly detection method seems to be necessary at this point of the development, so that we can validate whether the dataset being used is or not useful for the purposes of this work. Thus, the next step will be the implementation of an anomaly detection method.

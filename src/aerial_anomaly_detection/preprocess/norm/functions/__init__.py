@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 
 from numpy.typing import NDArray
 
+
 class Norm(ABC):
     """
     Class to implement a generic normalization function.

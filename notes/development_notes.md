@@ -75,3 +75,9 @@ During the 10th day of the development, mask tiling was implemented by making us
 During the 11th day of development, data access was guaranteed through the development of two classes: (I) a class that extended the functionalities of the dataset class of PyTorch, (II) and a class that extended the base functionalities of the PyTorch DataLoader. The latter was only required to also iterate over tile names and not only its data (img and mask). This development is thought to facilitate future developments.
 
 However, the implementation of an anomaly detection method seems to be necessary at this point of the development, so that we can validate whether the dataset being used is or not useful for the purposes of this work. Thus, the next step will be the implementation of an anomaly detection method.
+
+## Days 12 and 13: until 16-01-2025
+
+During the 12th and 13th days of development, the encoder, decoder and convolutional autoencoder (mix of the former two models) were implemented. The implementation was purely based on the original reference paper (cited in the code) and padding was used to preserve the expected input size (although the paper does not claim anything about using or not using padding, hence the most reasonable decision of using padding was taken). The implementation was fully tested with random images of the expected size, obtaining the expected output shape as a result of the forward pass, which served as a validation of the performed implementation.
+
+From this point onwards training and evaluation scripts were required to train and evaluate a convolutional autoencoder in the context of anomaly detection on aerial imagery. These tasks will be addressed in the following days of development.

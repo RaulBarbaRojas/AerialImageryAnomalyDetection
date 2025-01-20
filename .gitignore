@@ -5,6 +5,12 @@
 data/
 data
 
+# Runs folder
+runs/
+
+# Models folder
+models/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

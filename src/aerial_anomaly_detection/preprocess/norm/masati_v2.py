@@ -13,8 +13,7 @@ import pandas as pd
 from afml.context import run_ctx
 from tqdm.auto import tqdm
 
-from aerial_anomaly_detection.preprocess.norm.functions.mean_scale_norm import MeanScaleNorm
-from aerial_anomaly_detection.utils.dataset_utils import str_to_value_list
+from aerial_anomaly_detection.preprocess.norm.functions.unitary_symmetric_interval_norm import UnitarySymmetricIntervalNorm
 
 
 def normalize_partition(partition : str, index_df : pd.DataFrame, processed_dataset_folder : Path) -> None:
@@ -36,10 +35,7 @@ if __name__ == '__main__':
     # Step 1: Reading the mean-scale information from the .ini file
     processed_dataset_folder = Path(run_ctx.params.output_dataset_folder)
     index_df = pd.read_csv(processed_dataset_folder / 'index.csv')
-    (info_file := ConfigParser()).read(processed_dataset_folder / 'info.ini')
-    mean = str_to_value_list(info_file['stats']['mean'])
-    scale = str_to_value_list(info_file['stats']['scale'])
-    mean_scale_norm = MeanScaleNorm(mean, scale)
+    norm_fn = UnitarySymmetricIntervalNorm()
 
     # Step 2: Checking if normalized tiles have already been generated
     if 'norm_path' in index_df.columns:
@@ -57,8 +53,8 @@ if __name__ == '__main__':
         (processed_dataset_folder / norm_path).parent.mkdir(exist_ok = True, parents = True)
 
         img = cv2.imread(processed_dataset_folder / row.path, cv2.IMREAD_UNCHANGED)
-        img = img[...,::-1].transpose(2, 0, 1).astype(np.float64)
-        norm_img = mean_scale_norm(img)
+        img = img[...,::-1].transpose(2, 0, 1).astype(np.float32)
+        norm_img = norm_fn(img)
         norm_img.tofile(processed_dataset_folder / norm_path)
         norm_paths.append(norm_path)
 

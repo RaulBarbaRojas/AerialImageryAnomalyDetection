@@ -1,6 +1,11 @@
 ---
 version: 0.1.0-dev
 
+matrix:
+  run:
+    - # Execution 1: MASATIv2
+      dataset: MASATIv2ProcessedDataset
+
 datasets:
   - name: AirbusShipDetectionRawDataset
     folder: 'data/download/airbus-ship-detection'
@@ -13,6 +18,23 @@ datasets:
     params:
       img_width: 512
       img_height: 512
+
+  - name: MASATIv2ProcessedDataset
+    folder: 'data/processed/MASATI-v2'
+
+
+models:
+  - name: AutoEncoder
+    src: 'src/aerial_anomaly_detection/models/autoencoder.py:AutoEncoder'
+    params:
+      latent_dimension: 1000
+      img_width: 32
+      img_height: 32
+
+params:
+  run_folder: 'runs'
+  batch_size: 256
+  n_epochs: 20
 
 jobs:
   # - name: Preprocess Airbus Ship Detection
@@ -49,10 +71,10 @@ jobs:
       - name: Divide images into smaller and overlapped tiles
         python-module: aerial_anomaly_detection.preprocess.tile.masati_v2
         params:
-          tile_x_size: 128
-          tile_y_size: 128
-          x_step: 64
-          y_step: 64
+          tile_x_size: 32
+          tile_y_size: 32
+          x_step: 32
+          y_step: 32
         if:
           not_file: '{output_dataset_folder}/index.csv'
 
@@ -66,3 +88,17 @@ jobs:
 
       - name: Mask tiling
         python-module: aerial_anomaly_detection.preprocess.tile.mask_tiling_masati_v2
+        params:
+          tile_x_size: 32
+          tile_y_size: 32
+          x_step: 32
+          y_step: 32
+
+  - name: Train
+    steps:
+      - name: Training the Convolutional AutoEncoder
+        model: AutoEncoder
+        dataset: '{matrix.run.dataset}'
+        python-module: aerial_anomaly_detection.train.autoencoder_train
+        params:
+          out_folder: models

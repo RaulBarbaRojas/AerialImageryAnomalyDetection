@@ -87,11 +87,13 @@ class MASATIv2(torch.utils.data.Dataset):
         sample = self.index_df.iloc[idx_item]
 
         # Step 2: Loading sample data
-        img = np.fromfile(self.root_folder / sample.norm_path, dtype = np.float64).reshape((-1,
+        img = np.fromfile(self.root_folder / sample.norm_path, dtype = np.float32).reshape((-1,
                                                                                             int(sample.tile_x_size),
                                                                                             int(sample.tile_y_size)))
+        img = torch.from_numpy(img)
 
         # Step 3: Loading sample mask
         mask = cv2.imread(self.root_folder / sample.mask_path, cv2.IMREAD_GRAYSCALE)
+        mask = torch.from_numpy(mask)
 
         return (Path(sample.path).name, img, mask)

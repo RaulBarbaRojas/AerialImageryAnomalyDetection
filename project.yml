@@ -20,7 +20,7 @@ models:
       latent_dimension: 1000
       img_width: 32
       img_height: 32
-      model_weights: models/AutoEncoder/model.pth
+      pretrained_weights: weights/autoencoder.pth
 
 params:
   run_folder: 'runs'
@@ -66,14 +66,14 @@ jobs:
 
   - name: Evaluation
     params:
-      base_out_folder: runs
+      base_out_folder: '{run_folder}'
     steps:
-      - name: Evaluate Convolutional AutoEncoder
-        python-module: aerial_anomaly_detection.evaluation.landcover_ai.autoencoder
+      - name: Model evaluation
+        python-module: aerial_anomaly_detection.evaluation.evaluate_model
         dataset: LandCoverAI
         model: AutoEncoder
         params:
-          out_folder: '{base_out_folder}/{model.name}'
+          out_folder: '{base_out_folder}/{model.name}/{dataset.name}'
           tile_width: 32
           tile_height: 32
           tile_x_step: 32

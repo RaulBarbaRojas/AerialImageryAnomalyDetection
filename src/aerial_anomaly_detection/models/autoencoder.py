@@ -3,10 +3,12 @@ Module to implement a convolutional autoencoder for anomaly detection on aerial 
 """
 
 
+from typing import Any, Dict
+
+from munch import Munch
 import torch
 
-from .utils import (Encoder,
-                    Decoder)
+from aerial_anomaly_detection.models.utils import Encoder, Decoder
 
 
 class AutoEncoder(torch.nn.Module):
@@ -15,7 +17,7 @@ class AutoEncoder(torch.nn.Module):
     """
 
 
-    def __init__(self, latent_dimension : int, img_width : int, img_height : int) -> None:
+    def __init__(self, latent_dimension : int, img_width : int, img_height : int, **model_settings : Dict[str, Any]) -> None:
         """
         Constructor method of the AutoEncoder class.
 
@@ -23,12 +25,14 @@ class AutoEncoder(torch.nn.Module):
             latent_dimension (int): the size of the latent dimension of the autoencoder.
             img_width (int): the width of the input (and output) images.
             img_height (int): the height of the input (and output) images.
+            model_settings (Dict[str, Any]): a dictionary containing other settings relevant for using the model in the general workflow.
         """
         super().__init__()
 
         self.latent_dimension = latent_dimension
         self.img_width = img_width
         self.img_height = img_height
+        self.model_settings = Munch(model_settings)
 
         self.encoder = Encoder(self.latent_dimension, self.img_width, self.img_height)
         self.decoder = Decoder(self.latent_dimension, self.img_width, self.img_height)

@@ -7,9 +7,6 @@ from typing import Any, Dict, Tuple
 
 import torch
 
-# Syntactic sugar to facilitate module usage
-from aerial_anomaly_detection.datasets.masati_v2 import MASATIv2
-
 
 class DataLoader(torch.utils.data.DataLoader):
     """

@@ -1,68 +1,81 @@
 ---
 version: 0.1.0-dev
 
-datasets:
-  - name: AirbusShipDetectionRawDataset
-    folder: 'data/download/airbus-ship-detection'
-    params:
-      img_width: 768
-      img_height: 768
+matrix:
+  run:
+    - # Execution 1: LandCoverAI
+      dataset: LandCoverAI
+      model: AutoEncoder
 
-  - name: MASATIv2RawDataset
-    folder: 'data/download/MASATI-v2'
+datasets:
+  - name: LandCoverAI
+    folder: 'data/download/LandCoverAI'
     params:
-      img_width: 512
-      img_height: 512
+      processed_folder: 'data/processed/LandCoverAI'
+
+
+models:
+  - name: AutoEncoder
+    src: 'src/aerial_anomaly_detection/models/autoencoder.py:AutoEncoder'
+    params:
+      latent_dimension: 1000
+      img_width: 32
+      img_height: 32
+      pretrained_weights: weights/autoencoder.pth
+
+params:
+  run_folder: 'runs'
+  batch_size: 256
+  n_epochs: 200
 
 jobs:
-  # - name: Preprocess Airbus Ship Detection
-  #   dataset: AirbusShipDetectionRawDataset
-  #   params:
-  #     output_dataset_folder: 'data/processed/airbus-ship-detection'
-  #   steps:
-  #     - name: Calculate Ship Masks
-  #       python-module: aerial_anomaly_detection.preprocess.mask_generation.airbus_ship_detection
-  #       params:
-  #         mask_output_folder: '{output_dataset_folder}/full_masks'
-  #       if:
-  #         not_file: '{output_dataset_folder}/index.csv'
-
-  - name: Preprocess MASATI-v2 dataset
-    dataset: MASATIv2RawDataset
-    params:
-      output_dataset_folder: 'data/processed/MASATI-v2'
+  - name: Preprocess LandCover.ai dataset
+    dataset: LandCoverAI
     steps:
-      - name: Partition dataset into train/val/test partitions
-        python-module: aerial_anomaly_detection.preprocess.partition.masati_v2
+
+      - name: Setup LandCover.ai dataset
+        python-module: aerial_anomaly_detection.preprocess.setup.landcover_ai
+        if:
+          not_file: '{dataset.params.processed_folder}/scene_index.csv'
+
+      - name: Scene tiling
+        python-module: aerial_anomaly_detection.preprocess.tile.landcover_ai
         params:
-          train_size_pct: 0.85
+          tile_width: 32
+          tile_height: 32
+          tile_x_step: 32
+          tile_y_step: 32
+          test_tiles_per_type_and_scene: 100
         if:
-          not_file: '{output_dataset_folder}/partitions.csv'
+          not_file: '{dataset.params.processed_folder}/tile_index.csv'
 
-      - name: Mask generation
-        python-module: aerial_anomaly_detection.preprocess.mask_generation.masati_v2
+      - name: Tile partitioning
+        python-module: aerial_anomaly_detection.preprocess.partition.landcover_ai
         params:
-          mask_output_folder: '{output_dataset_folder}/full_masks'
-        if:
-          not_file: '{output_dataset_folder}/masks.csv'
+          train_pct: 0.8
 
-      - name: Divide images into smaller and overlapped tiles
-        python-module: aerial_anomaly_detection.preprocess.tile.masati_v2
+  - name: Train
+    dataset: '{matrix.run.dataset}'
+    model: '{matrix.run.model}'
+    params:
+      out_folder: '{run_folder}/{model.name}/{dataset.name}/train'
+    steps:
+      - name: Generic model training
+        python-module: aerial_anomaly_detection.train.train_model
         params:
-          tile_x_size: 128
-          tile_y_size: 128
-          x_step: 64
-          y_step: 64
+          learning_rate: 0.0001
+
+  - name: Evaluation
+    dataset: '{matrix.run.dataset}'
+    model: '{matrix.run.model}'
+    out_folder: '{run_folder}/{model.name}/{dataset.name}/inference'
+    steps:
+      - name: Generic model evaluation
+        python-module: aerial_anomaly_detection.evaluation.evaluate_model
+        params:
+          tile_width: 32
+          tile_height: 32
+          tile_x_step: 32
+          tile_y_step: 32
         if:
-          not_file: '{output_dataset_folder}/index.csv'
-
-      - name: Stats calculation
-        python-module: aerial_anomaly_detection.preprocess.stats.masati_v2
-        if:
-          not_file: '{output_dataset_folder}/info.ini'
-
-      - name: Tile normalization
-        python-module: aerial_anomaly_detection.preprocess.norm.masati_v2
-
-      - name: Mask tiling
-        python-module: aerial_anomaly_detection.preprocess.tile.mask_tiling_masati_v2
+          not_file: '{out_folder}/global_metrics.csv'

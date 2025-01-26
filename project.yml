@@ -5,6 +5,7 @@ matrix:
   run:
     - # Execution 1: LandCoverAI
       dataset: LandCoverAI
+      model: AutoEncoder
 
 datasets:
   - name: LandCoverAI
@@ -54,26 +55,24 @@ jobs:
           train_pct: 0.8
 
   - name: Train
+    dataset: '{matrix.run.dataset}'
+    model: '{matrix.run.model}'
     params:
-      out_folder: models
+      out_folder: '{run_folder}/{model.name}/{dataset.name}/train'
     steps:
-      - name: Train Convolutional AutoEncoder
-        python-module: aerial_anomaly_detection.train.autoencoder_landcover_ai
-        dataset: LandCoverAI
-        model: AutoEncoder
+      - name: Generic model training
+        python-module: aerial_anomaly_detection.train.train_model
         params:
           learning_rate: 0.0001
 
   - name: Evaluation
-    params:
-      base_out_folder: '{run_folder}'
+    dataset: '{matrix.run.dataset}'
+    model: '{matrix.run.model}'
+    out_folder: '{run_folder}/{model.name}/{dataset.name}/inference'
     steps:
-      - name: Model evaluation
+      - name: Generic model evaluation
         python-module: aerial_anomaly_detection.evaluation.evaluate_model
-        dataset: LandCoverAI
-        model: AutoEncoder
         params:
-          out_folder: '{base_out_folder}/{model.name}/{dataset.name}'
           tile_width: 32
           tile_height: 32
           tile_x_step: 32

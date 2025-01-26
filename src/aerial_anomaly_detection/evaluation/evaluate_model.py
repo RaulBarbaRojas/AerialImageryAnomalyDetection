@@ -34,7 +34,7 @@ if __name__ == '__main__':
             loss_fn = torch.nn.MSELoss()
             reconstruction_error_fn = lambda model, X, y_pred, y: loss_fn(y_pred, X).item()
         case _:
-            raise ValueError(f'Unknown dataset "{run_ctx.dataset.name}"')
+            raise ValueError(f'[ModelEvaluation] Unknown dataset "{run_ctx.dataset.name}"')
 
     val_dataloader = DataLoader(val_dataset, batch_size = batch_size, shuffle = False, num_workers = os.cpu_count())
 
@@ -53,7 +53,7 @@ if __name__ == '__main__':
                                                         output_folder = run_ctx.params.out_folder,
                                                         scene_df = pd.read_csv(Path(run_ctx.dataset.params.processed_folder) / 'scene_index.csv'))
         case _:
-            raise ValueError(f'Unknown dataset "{run_ctx.dataset.name}"')
+            raise ValueError(f'[ModelEvaluation] Unknown dataset "{run_ctx.dataset.name}"')
 
     # Step 4: Running evaluation
     scene_metric_df, global_metric_df = model_evaluator.evaluate()

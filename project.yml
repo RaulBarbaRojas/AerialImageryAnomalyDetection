@@ -68,7 +68,8 @@ jobs:
   - name: Evaluation
     dataset: '{matrix.run.dataset}'
     model: '{matrix.run.model}'
-    out_folder: '{run_folder}/{model.name}/{dataset.name}/inference'
+    params:
+      out_folder: '{run_folder}/{model.name}/{dataset.name}/inference'
     steps:
       - name: Generic model evaluation
         python-module: aerial_anomaly_detection.evaluation.evaluate_model

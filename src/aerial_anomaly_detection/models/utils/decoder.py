@@ -8,7 +8,6 @@ Generative Adversarial Networks for anomaly detection in aerial images. Computer
 
 
 import torch
-import torch.nn.functional as F
 
 
 class Decoder(torch.nn.Module):

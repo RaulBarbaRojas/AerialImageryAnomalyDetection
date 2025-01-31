@@ -5,6 +5,7 @@ Module to implement a generic training functionality.
 
 import pickle
 import sys
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Callable, Dict
 
@@ -18,7 +19,7 @@ from aerial_anomaly_detection.datasets import DataLoader
 from aerial_anomaly_detection.evaluation.metrics import accuracy, precision, recall, f1
 
 
-class ModelTrainer:
+class ModelTrainer(ABC):
     """
     Class to implement the generic training functionality.
     """
@@ -114,52 +115,32 @@ class ModelTrainer:
         return {'val_loss' : epoch_val_loss}
 
 
-    def _test_step(self, reconstruction_error_threshold : float) -> Dict[str, Any]:
+    @abstractmethod
+    def _test_step(self, reconstruction_error_threshold : float, epoch : int) -> Dict[str, Any]:
         """
-        Method to carry out the train step during the epoch.
+        Method to carry out the test step during the epoch.
         NOTE: the test step is simply used for checking model performance in real time.\
               Test information is NEVER used for model selection as can be seen from the code.
 
         Args:
             reconstruction_error_threshold (float): the reconstruction error threshold used for anomaly prediction.
+            epoch (int): the epoch that includes this test step.
 
         Returns:
             A dictionary containing relevant test metadata, such as model performance metrics.
         """
-        test_metadata : Dict[str, Any] = {}
-        confussion_matrix = np.zeros((2, 2))
-
-        self.model.eval()
-        with torch.inference_mode():
-            for _, X, y in tqdm(self.test_dataloader,
-                                desc = 'Testing model performance on dummy test dataset',
-                                unit = 'batch',
-                                dynamic_ncols = True,
-                                file = sys.stdout,
-                                leave = True):
-                X = X.to(self.device)
-                y_pred = self.model(X)
-                loss = self.loss_calculation_fn(self.model, X, y_pred, y).item()
-                pred_anomaly = int(loss > reconstruction_error_threshold)
-                ground_truth_anomaly = int(y != 3)
-                confussion_matrix[ground_truth_anomaly, pred_anomaly] += 1
-
-        test_metadata['confussion_matrix'] = confussion_matrix
-        test_metadata['test_accuracy'] = accuracy(confussion_matrix)
-        test_metadata['test_precision'] = precision(confussion_matrix)
-        test_metadata['test_recall'] = recall(confussion_matrix)
-        test_metadata['test_f1'] = f1(confussion_matrix)
-
-        return test_metadata
 
 
-    def _train_one_epoch(self) -> Dict[str, Any]:
+    def _train_one_epoch(self, epoch) -> Dict[str, Any]:
         """
         Method to train the given model during an epoch.
+
+        Args:
+            epoch (int): the epoch being executed.
         """
         train_metadata = self._train_step()
         val_metadata = self._validation_step()
-        test_metadata = self._test_step(val_metadata['val_loss'])
+        test_metadata = self._test_step(val_metadata['val_loss'], epoch)
 
         return train_metadata | val_metadata | test_metadata
 
@@ -181,7 +162,7 @@ class ModelTrainer:
                           unit = 'epoch',
                           file = sys.stdout,
                           dynamic_ncols = True):
-            self.train_history[epoch] = self._train_one_epoch()
+            self.train_history[epoch] = self._train_one_epoch(epoch)
             if best_val_loss > self.train_history[epoch]['val_loss']:
                 best_val_loss = self.train_history[epoch]['val_loss']
                 self._save_model('best')
@@ -192,6 +173,7 @@ class ModelTrainer:
                   f'Test precision: {self.train_history[epoch]['test_precision']:.6f} | '
                   f'Test recall: {self.train_history[epoch]['test_recall']:.6f} | '
                   f'Test F1: {self.train_history[epoch]['test_f1']:.6f}')
+            print(self.train_history[epoch]['confussion_matrix'])
 
         return self.train_history
 

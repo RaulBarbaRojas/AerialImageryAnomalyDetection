@@ -3,8 +3,12 @@ version: 0.1.0-dev
 
 matrix:
   run:
-    - # Execution 1: LandCoverAI
-      dataset: LandCoverAI
+    # - # Execution 1: LandCoverAI
+    #   dataset: LandCoverAI
+    #   model: AutoEncoder
+
+    - # Execution 2: MASATIv2
+      dataset: MASATIv2
       model: AutoEncoder
 
 datasets:
@@ -12,6 +16,11 @@ datasets:
     folder: 'data/download/LandCoverAI'
     params:
       processed_folder: 'data/processed/LandCoverAI'
+
+  - name: MASATIv2
+    folder: 'data/download/MASATI-v2'
+    params:
+      processed_folder: 'data/processed/MASATI-v2'
 
 
 models:
@@ -21,7 +30,7 @@ models:
       latent_dimension: 1000
       img_width: 32
       img_height: 32
-      pretrained_weights: weights/autoencoder.pth
+      # pretrained_weights: weights/autoencoder.pth
 
 params:
   run_folder: 'runs'
@@ -32,7 +41,6 @@ jobs:
   - name: Preprocess LandCover.ai dataset
     dataset: LandCoverAI
     steps:
-
       - name: Setup LandCover.ai dataset
         python-module: aerial_anomaly_detection.preprocess.setup.landcover_ai
         if:
@@ -53,6 +61,24 @@ jobs:
         python-module: aerial_anomaly_detection.preprocess.partition.landcover_ai
         params:
           train_pct: 0.8
+
+  - name: Preprocess MASATI (v2) dataset
+    dataset: MASATIv2
+    steps:
+      - name: Setup MASATI (v2) dataset
+        python-module: aerial_anomaly_detection.preprocess.setup.masati_v2
+        if:
+          not_file: '{dataset.params.processed_folder}/scene_index.csv'
+
+      - name: Scene tiling
+        python-module: aerial_anomaly_detection.preprocess.tile.masati_v2
+        params:
+          tile_width: 32
+          tile_height: 32
+          tile_x_step: 32
+          tile_y_step: 32
+        if:
+          not_file: '{dataset.params.processed_folder}/tile_index.csv'
 
   - name: Train
     dataset: '{matrix.run.dataset}'

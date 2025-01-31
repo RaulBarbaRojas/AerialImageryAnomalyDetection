@@ -11,7 +11,9 @@ from afml.context import run_ctx
 
 from aerial_anomaly_detection.datasets import DataLoader
 from aerial_anomaly_detection.datasets.landcover_ai import LandCoverAI
-from aerial_anomaly_detection.train import ModelTrainer
+from aerial_anomaly_detection.datasets.masati_v2 import MASATIv2
+from aerial_anomaly_detection.train.landcover_ai import LandCoverAIModelTrainer
+from aerial_anomaly_detection.train.masati_v2 import MASATIv2ModelTrainer
 
 
 if __name__ == '__main__':
@@ -33,16 +35,22 @@ if __name__ == '__main__':
 
     match run_ctx.dataset.name:
         case 'LandCoverAI':
-            train_dataset = LandCoverAI.load(processed_dataset_folder, partition = 'train')
-            train_dataloader = DataLoader(train_dataset, batch_size = batch_size, shuffle = True, num_workers = os.cpu_count())
-
-            val_dataset = LandCoverAI.load(processed_dataset_folder, partition = 'val')
-            val_dataloader = DataLoader(val_dataset, batch_size = batch_size, shuffle = False, num_workers = os.cpu_count())
-
-            test_dataset = LandCoverAI.load(processed_dataset_folder, partition = 'test')
-            test_dataloader = DataLoader(test_dataset, batch_size = 1, shuffle = False)
+            dataset_class = LandCoverAI
+            model_trainer_class = LandCoverAIModelTrainer
+        case 'MASATIv2':
+            dataset_class = MASATIv2
+            model_trainer_class = MASATIv2ModelTrainer
         case _:
             raise ValueError(f'[ModelTraining] Unknown dataset "{run_ctx.dataset.name}"')
+
+    train_dataset = dataset_class.load(processed_dataset_folder, partition = 'train')
+    train_dataloader = DataLoader(train_dataset, batch_size = batch_size, shuffle = True, num_workers = os.cpu_count())
+
+    val_dataset = dataset_class.load(processed_dataset_folder, partition = 'val')
+    val_dataloader = DataLoader(val_dataset, batch_size = batch_size, shuffle = False, num_workers = os.cpu_count())
+
+    test_dataset = dataset_class.load(processed_dataset_folder, partition = 'test')
+    test_dataloader = DataLoader(test_dataset, batch_size = 1, shuffle = False)
 
     # Step 3: Setting up training parameters
     n_epochs = run_ctx.params.get('n_epochs', 200)
@@ -58,13 +66,13 @@ if __name__ == '__main__':
 
     # Step 4: Running model training
     (output_folder := Path(run_ctx.params.out_folder)).mkdir(exist_ok = True, parents = True)
-    model_trainer = ModelTrainer(model = model,
-                                 train_dataloader = train_dataloader,
-                                 val_dataloader = val_dataloader,
-                                 test_dataloader = test_dataloader,
-                                 loss_calculation_fn = loss_calculation_fn,
-                                 optimizer = optimizer,
-                                 device = device,
-                                 output_folder = output_folder)
+    model_trainer = model_trainer_class(model = model,
+                                        train_dataloader = train_dataloader,
+                                        val_dataloader = val_dataloader,
+                                        test_dataloader = test_dataloader,
+                                        loss_calculation_fn = loss_calculation_fn,
+                                        optimizer = optimizer,
+                                        device = device,
+                                        output_folder = output_folder)
     model_trainer.train_n_epochs(n_epochs)
     model_trainer.save()

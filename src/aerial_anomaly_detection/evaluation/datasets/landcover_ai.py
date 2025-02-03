@@ -112,9 +112,8 @@ class LandCoverAIModelEvaluator(ModelEvaluator):
 
                         y_pred = self.model(tile)
 
-                        reconstruction_error = self.reconstruction_error_fn(self.model, y_pred.to(self.device),
-                                                                            tile, torch.Tensor([ground_truth_anomaly]))
-
+                        reconstruction_error = self.reconstruction_error_fn(self.model, tile, y_pred.to(self.device),
+                                                                            torch.Tensor([ground_truth_anomaly]))
                         pred_anomaly = int(reconstruction_error > reconstruction_error_threshold)
                         pred_mask[y_coord : y_coord + self.tile_height, x_coord : x_coord + self.tile_width] |= pred_anomaly * 255
 

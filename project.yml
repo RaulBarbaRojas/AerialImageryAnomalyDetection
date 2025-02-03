@@ -3,9 +3,13 @@ version: 0.1.0-dev
 
 matrix:
   run:
-    - # Execution 1: LandCoverAI
+    # - # Execution 1: LandCoverAI w/ AutoEncoder
+    #   dataset: LandCoverAI
+    #   model: AutoEncoder
+
+    - # Execution 2: LandCoverAI w/ DCGAN discriminator
       dataset: LandCoverAI
-      model: AutoEncoder
+      model: DCGANDiscriminator
 
 datasets:
   - name: LandCoverAI
@@ -22,6 +26,14 @@ models:
       img_width: 32
       img_height: 32
       pretrained_weights: weights/autoencoder.pth
+
+  - name: DCGANDiscriminator
+    src: 'src/aerial_anomaly_detection/models/utils/dcgan_discriminator.py:Discriminator'
+    params:
+      img_width: 32
+      img_height: 32
+      use_sigmoid_head: True
+      pretrained_weights: 'runs/DCGAN/LandCoverAI/train/epoch_200/discriminator.pth'
 
 params:
   run_folder: 'runs'
@@ -54,7 +66,24 @@ jobs:
         params:
           train_pct: 0.8
 
-  - name: Train
+  - name: Train DCGAN
+    dataset: LandCoverAI
+    steps:
+    - name: DCGAN Training
+      python-module: aerial_anomaly_detection.train.landcover_ai_dcgan
+      params:
+        out_folder: '{run_folder}/DCGAN/{dataset.name}/train'
+        pretrained_weights: 'runs/DCGAN/LandCoverAI/train/epoch_190'
+        latent_dimension: 1000
+        img_width: 32
+        img_height: 32
+        n_epochs: 10
+        start_epoch: 191
+        epochs_per_save: 10
+        num_evaluation_images: 64
+        learning_rate: 0.0001
+
+  - name: Train anomaly detectors
     dataset: '{matrix.run.dataset}'
     model: '{matrix.run.model}'
     params:

@@ -31,12 +31,19 @@ if __name__ == '__main__':
     match run_ctx.dataset.name:
         case 'LandCoverAI':
             val_dataset = LandCoverAI.load(run_ctx.dataset.params.processed_folder, partition = 'val')
-            loss_fn = torch.nn.MSELoss()
-            reconstruction_error_fn = lambda model, X, y_pred, y: loss_fn(y_pred, X).item()
         case _:
             raise ValueError(f'[ModelEvaluation] Unknown dataset "{run_ctx.dataset.name}"')
 
     val_dataloader = DataLoader(val_dataset, batch_size = batch_size, shuffle = False, num_workers = os.cpu_count())
+
+    match run_ctx.model.name:
+        case 'AutoEncoder':
+            loss_fn = torch.nn.MSELoss()
+            reconstruction_error_fn = lambda model, X, y_pred, y: loss_fn(y_pred, X).item()
+        case 'DCGANDiscriminator':
+            reconstruction_error_fn = lambda model, X, y_pred, y: torch.mean(1.0 - y_pred).item()
+        case _:
+            raise ValueError(f'[ModelEvaluation] Unknown model "{run_ctx.dataset.name}"')
 
     # Step 3: Setting up model evaluator
     match run_ctx.dataset.name:
@@ -54,6 +61,12 @@ if __name__ == '__main__':
                                                         scene_df = pd.read_csv(Path(run_ctx.dataset.params.processed_folder) / 'scene_index.csv'))
         case _:
             raise ValueError(f'[ModelEvaluation] Unknown dataset "{run_ctx.dataset.name}"')
+
+    match run_ctx.model.name:
+        case 'AutoEncoder':
+            pass
+        case 'DCGANDiscriminator':
+            model_evaluator._calculate_reconstruction_error_treshold = lambda: 0.5
 
     # Step 4: Running evaluation
     scene_metric_df, global_metric_df = model_evaluator.evaluate()

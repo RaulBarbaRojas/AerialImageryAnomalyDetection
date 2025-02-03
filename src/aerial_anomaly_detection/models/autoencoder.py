@@ -5,8 +5,8 @@ Module to implement a convolutional autoencoder for anomaly detection on aerial 
 
 from typing import Any, Dict
 
-from munch import Munch
 import torch
+from munch import Munch
 
 from aerial_anomaly_detection.models.utils import Encoder, Decoder
 

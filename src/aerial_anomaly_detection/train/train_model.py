@@ -49,10 +49,10 @@ if __name__ == '__main__':
     learning_rate = run_ctx.params.get('learning_rate', 0.0001)
 
     match run_ctx.model.name:
-        case 'AutoEncoder':
+        case 'AutoEncoder' | 'Izi':
             loss_fn = torch.nn.MSELoss()
             loss_calculation_fn = lambda model, X, y_pred, y: loss_fn(y_pred, X)
-            optimizer = torch.optim.Adam(params = model.parameters(), lr = learning_rate)
+            optimizer = torch.optim.Adam(params = filter(lambda param: param.requires_grad, model.parameters()), lr = learning_rate)
         case _:
             raise ValueError(f'[ModelTraining] Unknown model "{run_ctx.dataset.name}"')
 

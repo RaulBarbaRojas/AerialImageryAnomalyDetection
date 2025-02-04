@@ -1,12 +1,15 @@
 """
 Module to implement a convolutional autoencoder for anomaly detection on aerial imagery.
+
+Cite: Contreras-Cruz, M. A., Correa-Tome, F. E., Lopez-Padilla, R., & Ramirez-Paredes, J. P. (2023).\
+Generative Adversarial Networks for anomaly detection in aerial images. Computers and Electrical Engineering, 106, 108470.
 """
 
 
 from typing import Any, Dict
 
-from munch import Munch
 import torch
+from munch import Munch
 
 from aerial_anomaly_detection.models.utils import Encoder, Decoder
 

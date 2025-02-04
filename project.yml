@@ -7,9 +7,13 @@ matrix:
     #   dataset: LandCoverAI
     #   model: AutoEncoder
 
-    - # Execution 2: LandCoverAI w/ DCGAN discriminator
+    # - # Execution 2: LandCoverAI w/ DCGAN discriminator
+    #   dataset: LandCoverAI
+    #   model: DCGANDiscriminator
+
+    - # Execution 3: LandCoverAI w/ izi architecture
       dataset: LandCoverAI
-      model: DCGANDiscriminator
+      model: Izi
 
 datasets:
   - name: LandCoverAI
@@ -34,6 +38,15 @@ models:
       img_height: 32
       use_sigmoid_head: True
       pretrained_weights: 'runs/DCGAN/LandCoverAI/train/epoch_200/discriminator.pth'
+
+  - name: Izi
+    src: 'src/aerial_anomaly_detection/models/izi.py:Izi'
+    params:
+      latent_dimension: 1000
+      img_width: 32
+      img_height: 32
+      pretrained_decoder_weights_path: 'models/DCGAN/generator.pth'
+      pretrained_weights: weights/izi.pth
 
 params:
   run_folder: 'runs'

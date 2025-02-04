@@ -37,13 +37,13 @@ if __name__ == '__main__':
     val_dataloader = DataLoader(val_dataset, batch_size = batch_size, shuffle = False, num_workers = os.cpu_count())
 
     match run_ctx.model.name:
-        case 'AutoEncoder':
+        case 'AutoEncoder' | 'Izi':
             loss_fn = torch.nn.MSELoss()
             reconstruction_error_fn = lambda model, X, y_pred, y: loss_fn(y_pred, X).item()
         case 'DCGANDiscriminator':
             reconstruction_error_fn = lambda model, X, y_pred, y: torch.mean(1.0 - y_pred).item()
         case _:
-            raise ValueError(f'[ModelEvaluation] Unknown model "{run_ctx.dataset.name}"')
+            raise ValueError(f'[ModelEvaluation] Unknown model "{run_ctx.model.name}"')
 
     # Step 3: Setting up model evaluator
     match run_ctx.dataset.name:

@@ -37,7 +37,7 @@ if __name__ == '__main__':
     val_dataloader = DataLoader(val_dataset, batch_size = batch_size, shuffle = False, num_workers = os.cpu_count())
 
     match run_ctx.model.name:
-        case 'AutoEncoder' | 'Izi':
+        case 'AutoEncoder' | 'Izi' | 'Ziz':
             loss_fn = torch.nn.MSELoss()
             reconstruction_error_fn = lambda model, X, y_pred, y: loss_fn(y_pred, X).item()
         case 'DCGANDiscriminator':
@@ -63,8 +63,6 @@ if __name__ == '__main__':
             raise ValueError(f'[ModelEvaluation] Unknown dataset "{run_ctx.dataset.name}"')
 
     match run_ctx.model.name:
-        case 'AutoEncoder':
-            pass
         case 'DCGANDiscriminator':
             model_evaluator._calculate_reconstruction_error_treshold = lambda: 0.5
 

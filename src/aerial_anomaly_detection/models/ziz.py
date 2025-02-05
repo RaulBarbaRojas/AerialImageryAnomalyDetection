@@ -7,7 +7,7 @@ Generative Adversarial Networks for anomaly detection in aerial images. Computer
 
 
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Literal
 
 import torch
 
@@ -46,17 +46,25 @@ class Ziz(AutoEncoder):
             parameter.requires_grad = False
 
 
-    def forward(self, x : torch.Tensor) -> torch.Tensor:
+    def forward(self, x : torch.Tensor, mode : Literal['train', 'inference'], **kwargs : Dict[str, Any]) -> torch.Tensor:
         """
         Method to implement the forward pass of the Ziz architecture.
 
         Args:
             x (torch.Tensor): the input tensor of the ziz architecture.
+            mode (Literal): whether Ziz will be used training (`train`) or inference (`inference`).
+            **kwargs (Dict[str, Any]): extra unused parameters required due to the generic implementation of train/test scripts.
 
         Returns:
             The output tensor after the forward pass of the ziz architecture.
         """
-        x = self.decoder(x)
-        x = self.encoder(x)
+        assert mode == 'train' or mode == 'inference'
+
+        if mode == 'train':
+            x = self.decoder(x)
+            x = self.encoder(x)
+        else:
+            x = self.encoder(x)
+            x = self.decoder(x)
 
         return x

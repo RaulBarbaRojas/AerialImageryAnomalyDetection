@@ -41,12 +41,13 @@ class AutoEncoder(torch.nn.Module):
         self.decoder = Decoder(self.latent_dimension, self.img_width, self.img_height)
 
 
-    def forward(self, x : torch.Tensor) -> torch.Tensor:
+    def forward(self, x : torch.Tensor, **kwargs : Dict[str, Any]) -> torch.Tensor:
         """
         Method to implement the forward pass of the convolutional autoencoder.
 
         Args:
             x (Tensor): the input tensor of the convolutional autoencoder forward pass.
+            **kwargs (Dict[str, Any]): extra unused parameters required due to the generic implementation of train/test scripts.
 
         Returns:
             The output tensor after the forward pass of the convolutional autoencoder.

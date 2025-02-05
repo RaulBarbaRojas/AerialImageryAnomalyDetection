@@ -11,7 +11,7 @@ from afml.context import run_ctx
 
 from aerial_anomaly_detection.datasets import DataLoader
 from aerial_anomaly_detection.datasets.landcover_ai import LandCoverAI
-from aerial_anomaly_detection.train import ModelTrainer
+from aerial_anomaly_detection.train import ModelTrainer, ZizModelTrainer
 
 
 if __name__ == '__main__':
@@ -53,18 +53,24 @@ if __name__ == '__main__':
             loss_fn = torch.nn.MSELoss()
             loss_calculation_fn = lambda model, X, y_pred, y: loss_fn(y_pred, X)
             optimizer = torch.optim.Adam(params = filter(lambda param: param.requires_grad, model.parameters()), lr = learning_rate)
+            model_trainer_class = ModelTrainer
+        case 'Ziz':
+            loss_fn = torch.nn.MSELoss()
+            loss_calculation_fn = lambda model, X, y_pred, y: loss_fn(y_pred, X)
+            optimizer = torch.optim.Adam(params = filter(lambda param: param.requires_grad, model.parameters()), lr = learning_rate)
+            model_trainer_class = ZizModelTrainer
         case _:
             raise ValueError(f'[ModelTraining] Unknown model "{run_ctx.dataset.name}"')
 
     # Step 4: Running model training
     (output_folder := Path(run_ctx.params.out_folder)).mkdir(exist_ok = True, parents = True)
-    model_trainer = ModelTrainer(model = model,
-                                 train_dataloader = train_dataloader,
-                                 val_dataloader = val_dataloader,
-                                 test_dataloader = test_dataloader,
-                                 loss_calculation_fn = loss_calculation_fn,
-                                 optimizer = optimizer,
-                                 device = device,
-                                 output_folder = output_folder)
+    model_trainer = model_trainer_class(model = model,
+                                        train_dataloader = train_dataloader,
+                                        val_dataloader = val_dataloader,
+                                        test_dataloader = test_dataloader,
+                                        loss_calculation_fn = loss_calculation_fn,
+                                        optimizer = optimizer,
+                                        device = device,
+                                        output_folder = output_folder)
     model_trainer.train_n_epochs(n_epochs)
     model_trainer.save()

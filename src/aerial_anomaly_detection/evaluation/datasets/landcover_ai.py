@@ -110,7 +110,7 @@ class LandCoverAIModelEvaluator(ModelEvaluator):
                         tile_mask = mask[y_coord : y_coord + self.tile_height, x_coord : x_coord + self.tile_width]
                         ground_truth_anomaly = int(int(np.sum(tile_mask != 3)) > (self.tile_width * self.tile_height / 2))
 
-                        y_pred = self.model(tile)
+                        y_pred = self.model(tile, mode = 'inference')
 
                         reconstruction_error = self.reconstruction_error_fn(self.model, tile, y_pred.to(self.device),
                                                                             torch.Tensor([ground_truth_anomaly]))

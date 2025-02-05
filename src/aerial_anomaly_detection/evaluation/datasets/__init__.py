@@ -60,7 +60,7 @@ class ModelEvaluator(ABC):
                                 file = sys.stdout,
                                 leave = True):
                 X = X.to(self.device)
-                y_pred = self.model(X)
+                y_pred = self.model(X, mode = 'inference')
                 reconstruction_error_threshold += self.reconstruction_error_fn(self.model, X, y_pred, y)
 
         reconstruction_error_threshold /= len(self.validation_dataloader)

@@ -11,9 +11,13 @@ matrix:
     #   dataset: LandCoverAI
     #   model: DCGANDiscriminator
 
-    - # Execution 3: LandCoverAI w/ izi architecture
+    # - # Execution 3: LandCoverAI w/ izi architecture
+    #   dataset: LandCoverAI
+    #   model: Izi
+
+    - # Execution 3: LandCoverAI w/ ziz architecture
       dataset: LandCoverAI
-      model: Izi
+      model: Ziz
 
 datasets:
   - name: LandCoverAI
@@ -47,6 +51,15 @@ models:
       img_height: 32
       pretrained_decoder_weights_path: 'models/DCGAN/generator.pth'
       pretrained_weights: weights/izi.pth
+
+  - name: Ziz
+    src: 'src/aerial_anomaly_detection/models/ziz.py:Ziz'
+    params:
+      latent_dimension: 1000
+      img_width: 32
+      img_height: 32
+      pretrained_decoder_weights_path: 'models/DCGAN/generator.pth'
+      pretrained_weights: weights/ziz.pth
 
 params:
   run_folder: 'runs'

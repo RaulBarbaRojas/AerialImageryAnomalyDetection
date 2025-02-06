@@ -105,7 +105,7 @@ class ModelTrainer:
                                 file = sys.stdout,
                                 leave = True):
                 X = X.to(self.device)
-                y_pred = self.model(X)
+                y_pred = self.model(X, mode = 'inference')
                 loss = self.loss_calculation_fn(self.model, X, y_pred, y)
                 epoch_val_loss += loss.item()
 
@@ -138,7 +138,7 @@ class ModelTrainer:
                                 file = sys.stdout,
                                 leave = True):
                 X = X.to(self.device)
-                y_pred = self.model(X)
+                y_pred = self.model(X, mode = 'inference') # Mode is added only for models that require it (ignored in the rest)
                 loss = self.loss_calculation_fn(self.model, X, y_pred, y).item()
                 pred_anomaly = int(loss > reconstruction_error_threshold)
                 ground_truth_anomaly = int(y != 3)
@@ -244,3 +244,38 @@ class ModelTrainer:
         self._save_model('last')
         self._save_train_history()
         self._plot_loss_curve()
+
+
+class ZizModelTrainer(ModelTrainer):
+    """
+    A class to implement the training of the ziz architecture.
+    """
+
+
+    def _train_step(self) -> Dict[str, Any]:
+        """
+        Method to carry out the train step during the epoch.
+
+        Returns:
+            A dictionary containing relevant training metadata, such as the epoch train loss.
+        """
+        epoch_train_loss = 0.0
+
+        self.model.train()
+        for _, X, y in tqdm(self.train_dataloader,
+                            desc = 'Train step',
+                            unit = 'epoch',
+                            file = sys.stdout,
+                            dynamic_ncols = True,
+                            leave = True):
+            sample_noise_vector = torch.randn((X.shape[0], self.model.latent_dimension), device = self.device)
+            y_pred = self.model(sample_noise_vector, mode = 'train')
+            loss = self.loss_calculation_fn(self.model, sample_noise_vector, y_pred, y)
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+            epoch_train_loss += loss.item()
+
+        epoch_train_loss /= len(self.train_dataloader)
+
+        return {'train_loss' : epoch_train_loss}

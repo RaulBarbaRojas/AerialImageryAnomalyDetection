@@ -27,7 +27,6 @@ class Discriminator(torch.nn.Module):
         Args:
             img_width (int): the width of the image.
             img_height (int): the height of the image.
-            use_sigmoid_head (bool): a flag to use sigmoid head or not.
             model_settings (Dict[str, Any]): a dictionary containing other settings relevant for using the model in the general workflow.
         """
         super().__init__()
@@ -61,6 +60,7 @@ class Discriminator(torch.nn.Module):
 
         Args:
             x (Tensor): the input tensor.
+            mode (Literal['train', 'inference']): whether the model is being used for training (raw logits) or inference (sigmoid).
 
         Returns:
             The resulting tensor after performing the forward pass of the discriminator.

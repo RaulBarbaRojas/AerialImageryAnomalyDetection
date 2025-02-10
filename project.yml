@@ -112,12 +112,11 @@ jobs:
       python-module: aerial_anomaly_detection.train.landcover_ai_dcgan
       params:
         out_folder: '{run_folder}/DCGAN/{dataset.name}/train'
-        pretrained_weights: 'runs/DCGAN/LandCoverAI/train/epoch_190'
         latent_dimension: 1000
         img_width: 32
         img_height: 32
-        n_epochs: 10
-        start_epoch: 191
+        n_epochs: 201
+        start_epoch: 1
         epochs_per_save: 10
         num_evaluation_images: 64
         learning_rate: 0.0001
@@ -129,12 +128,11 @@ jobs:
       python-module: aerial_anomaly_detection.train.landcover_ai_bigan
       params:
         out_folder: '{run_folder}/BiGAN/{dataset.name}/train'
-        pretrained_weights: 'runs/BiGAN/LandCoverAI/train/epoch_190'
         latent_dimension: 1000
         img_width: 32
         img_height: 32
-        n_epochs: 10
-        start_epoch: 191
+        n_epochs: 201
+        start_epoch: 1
         epochs_per_save: 10
         num_evaluation_images: 64
         learning_rate: 0.0001

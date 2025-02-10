@@ -42,6 +42,9 @@ if __name__ == '__main__':
             reconstruction_error_fn = lambda model, X, y_pred, y: loss_fn(y_pred, X).item()
         case 'DCGANDiscriminator':
             reconstruction_error_fn = lambda model, X, y_pred, y: torch.mean(1.0 - y_pred).item()
+        case 'BiGAN':
+            loss_fn = torch.nn.L1Loss()
+            reconstruction_error_fn = lambda model, X, y_pred, y: 0.9 * loss_fn(X, y_pred[0]).item() + 0.1 * loss_fn(y_pred[1], y_pred[2]).item()
         case _:
             raise ValueError(f'[ModelEvaluation] Unknown model "{run_ctx.model.name}"')
 

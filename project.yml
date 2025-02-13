@@ -19,9 +19,13 @@ matrix:
     #   dataset: LandCoverAI
     #   model: Ziz
 
+    # - # Execution 4: LandCoverAI w/ ziz architecture
+    #   dataset: LandCoverAI
+    #   model: BiGAN
+
     - # Execution 4: LandCoverAI w/ ziz architecture
       dataset: LandCoverAI
-      model: BiGAN
+      model: f-AnoGAN
 
 datasets:
   - name: LandCoverAI
@@ -73,6 +77,16 @@ models:
       pretrained_encoder_weights_path: 'models/BiGAN/encoder.pth'
       pretrained_generator_weights_path: 'models/BiGAN/generator.pth'
       pretrained_discriminator_weights_path: 'models/BiGAN/discriminator.pth'
+
+  - name: f-AnoGAN
+    src: 'src/aerial_anomaly_detection/models/f_anogan.py:FAnoGAN'
+    params:
+      latent_dimension: 1000
+      img_width: 32
+      img_height: 32
+      pretrained_decoder_weights_path: 'models/DCGAN/generator.pth'
+      pretrained_discriminator_weights_path: 'models/DCGAN/discriminator.pth'
+      pretrained_weights: weights/f_anogan.pth
 
 params:
   run_folder: 'runs'

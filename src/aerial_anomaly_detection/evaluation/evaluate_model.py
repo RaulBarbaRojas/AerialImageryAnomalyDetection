@@ -45,6 +45,9 @@ if __name__ == '__main__':
         case 'BiGAN':
             loss_fn = torch.nn.L1Loss()
             reconstruction_error_fn = lambda model, X, y_pred, y: 0.9 * loss_fn(X, y_pred[0]).item() + 0.1 * loss_fn(y_pred[1], y_pred[2]).item()
+        case 'f-AnoGAN':
+            loss_fn = torch.nn.MSELoss()
+            reconstruction_error_fn = lambda model, X, y_pred, y: loss_fn(X, y_pred[0]).item() + loss_fn(y_pred[1], y_pred[2]).item()
         case _:
             raise ValueError(f'[ModelEvaluation] Unknown model "{run_ctx.model.name}"')
 

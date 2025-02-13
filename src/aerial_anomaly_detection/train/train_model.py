@@ -59,6 +59,11 @@ if __name__ == '__main__':
             loss_calculation_fn = lambda model, X, y_pred, y: loss_fn(y_pred, X)
             optimizer = torch.optim.Adam(params = filter(lambda param: param.requires_grad, model.parameters()), lr = learning_rate)
             model_trainer_class = ZizModelTrainer
+        case 'f-AnoGAN':
+            loss_fn = torch.nn.MSELoss()
+            loss_calculation_fn = lambda model, X, y_pred, y: loss_fn(X, y_pred[0]) + loss_fn(y_pred[1], y_pred[2])
+            optimizer = torch.optim.Adam(params = filter(lambda param: param.requires_grad, model.parameters()), lr = learning_rate)
+            model_trainer_class = ModelTrainer
         case _:
             raise ValueError(f'[ModelTraining] Unknown model "{run_ctx.dataset.name}"')
 

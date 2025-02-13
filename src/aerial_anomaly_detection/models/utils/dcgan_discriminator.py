@@ -54,20 +54,25 @@ class Discriminator(torch.nn.Module):
         self.head = torch.nn.Sigmoid()
 
 
-    def forward(self, x : torch.Tensor, mode : Literal['train', 'inference'] = 'train') -> torch.Tensor:
+    def forward(self, x : torch.Tensor, mode : Literal['train', 'inference'] = 'train',
+                retrieve_features : bool = False) -> torch.Tensor:
         """
         Method to implement the forward pass of the discriminator.
 
         Args:
             x (Tensor): the input tensor.
             mode (Literal['train', 'inference']): whether the model is being used for training (raw logits) or inference (sigmoid).
+            retrieve_features (bool): whether discriminator features will be stored.
 
         Returns:
             The resulting tensor after performing the forward pass of the discriminator.
         """
-        x = self.features(x)
+        features = self.features[:-1](x)
+        x = self.features[-1](features)
 
         if mode == 'inference':
           x = self.head(x)
 
-        return x
+        output = x if retrieve_features is False else (x, features)
+
+        return output

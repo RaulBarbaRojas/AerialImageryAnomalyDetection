@@ -13,6 +13,7 @@ from afml.context import run_ctx
 from aerial_anomaly_detection.datasets import DataLoader
 from aerial_anomaly_detection.datasets.landcover_ai import LandCoverAI
 from aerial_anomaly_detection.evaluation.datasets.landcover_ai import LandCoverAIModelEvaluator
+from aerial_anomaly_detection.evaluation.datasets.hrc_whu import HRC_WHUModelEvaluator
 from aerial_anomaly_detection.preprocess.norm.functions.unitary_symmetric_interval_norm import UnitarySymmetricIntervalNorm
 
 
@@ -29,7 +30,7 @@ if __name__ == '__main__':
     batch_size = run_ctx.params.get('batch_size', 256)
 
     match run_ctx.dataset.name:
-        case 'LandCoverAI':
+        case 'LandCoverAI' | 'HRC_WHU':
             val_dataset = LandCoverAI.load(run_ctx.dataset.params.processed_folder, partition = 'val')
         case _:
             raise ValueError(f'[ModelEvaluation] Unknown dataset "{run_ctx.dataset.name}"')
@@ -65,6 +66,18 @@ if __name__ == '__main__':
                                                         input_folder = run_ctx.dataset.folder,
                                                         output_folder = run_ctx.params.out_folder,
                                                         scene_df = pd.read_csv(Path(run_ctx.dataset.params.processed_folder) / 'scene_index.csv'))
+        case 'HRC_WHU':
+            model_evaluator = HRC_WHUModelEvaluator(model = model,
+                                                    validation_dataloader = val_dataloader,
+                                                    reconstruction_error_fn = reconstruction_error_fn,
+                                                    norm_fn = UnitarySymmetricIntervalNorm(scale = 255),
+                                                    tile_width = run_ctx.params.get('tile_width', 32),
+                                                    tile_height = run_ctx.params.get('tile_height', 32),
+                                                    tile_x_step = run_ctx.params.get('tile_x_step', 32),
+                                                    tile_y_step = run_ctx.params.get('tile_y_step', 32),
+                                                    input_folder = run_ctx.dataset.folder,
+                                                    output_folder = run_ctx.params.out_folder,
+                                                    scene_df = pd.read_csv(Path(run_ctx.dataset.params.processed_folder) / 'scene_index.csv'))
         case _:
             raise ValueError(f'[ModelEvaluation] Unknown dataset "{run_ctx.dataset.name}"')
 

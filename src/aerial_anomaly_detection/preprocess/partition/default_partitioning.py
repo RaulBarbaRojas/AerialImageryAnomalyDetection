@@ -1,5 +1,5 @@
 """
-Module to partition the tiles of the LandCover.ai dataset.
+Module to partition the tiles of the datasets used in the project.
 """
 
 

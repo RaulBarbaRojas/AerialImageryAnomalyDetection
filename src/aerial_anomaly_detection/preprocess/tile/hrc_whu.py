@@ -43,16 +43,25 @@ if __name__ == '__main__':
                            unit = 'scene',
                            file = sys.stdout,
                            dynamic_ncols = True):
-        scene = rasterio.open(run_ctx.dataset.folder / 'images' / scene_data.scene_id).read()
-        mask = rasterio.open(run_ctx.dataset.folder / 'masks' / scene_data.scene_id).read().squeeze()
+        # Step 2.1: Reading scene and mask
+        scene_name = scene_data.scene_id
+        mask_name = f'{Path(scene_data.scene_id).stem}_ReferenceMask.tif'
+
+        scene = rasterio.open(run_ctx.dataset.folder / 'HRC_WHU' / scene_name).read()
+        mask = rasterio.open(run_ctx.dataset.folder / 'HRC_WHU' / mask_name).read().squeeze()
         (train_scene_out_folder := out_train_folder / Path(scene_data.scene_id).stem).mkdir(exist_ok = True, parents = True)
 
+        # Step 2.2: Cutting the lower part of the scene containing Google Earth's signature
+        scene = scene[:, :650, :]
+        mask = mask[:650, ...]
+
+        # Step 2.3: Tiling train images
         for tile, tile_mask, x, y in tiler_fn.tile(scene, mask):
-            if np.sum(tile_mask == 3) == tile_width * tile_height:
+            if np.sum(tile_mask == 255) == tile_width * tile_height:
                 norm_tile = norm_fn(tile).astype(np.float32)
                 tile_path = (train_scene_out_folder / f'x{x}_y{y}.bin')
                 tile_index_data.append((tile_path.relative_to(out_train_folder.parent), scene_data.scene_id,
-                                        tile_width, tile_height, tile_x_step, tile_y_step, 'train', 3))
+                                        tile_width, tile_height, tile_x_step, tile_y_step, 'train', 1))
                 norm_tile.tofile(tile_path)
 
     # Step 3: Tile test images
@@ -65,15 +74,24 @@ if __name__ == '__main__':
                            unit = 'scene',
                            file = sys.stdout,
                            dynamic_ncols = True):
-        scene = rasterio.open(run_ctx.dataset.folder / 'images' / scene_data.scene_id).read()
-        mask = rasterio.open(run_ctx.dataset.folder / 'masks' / scene_data.scene_id).read().squeeze()
+        # Step 3.1: Reading scene and mask
+        scene_name = scene_data.scene_id
+        mask_name = f'{Path(scene_data.scene_id).stem}_ReferenceMask.tif'
+
+        scene = rasterio.open(run_ctx.dataset.folder / 'HRC_WHU' / scene_name).read()
+        mask = rasterio.open(run_ctx.dataset.folder / 'HRC_WHU' / mask_name).read().squeeze()
         (test_scene_out_folder := out_test_folder / Path(scene_data.scene_id).stem).mkdir(exist_ok = True, parents = True)
 
-        for idx_tile_type in range(5):
+        # Step 3.2.: Cutting the lower part of the scene containing Google Earth's signature
+        scene = scene[:, :650, :]
+        mask = mask[:650, ...]
+
+        # Step 3.3: Tiling test images
+        for idx_tile_type in range(2):
             tile_type_scene_count = test_tiles_per_type_and_scene
 
             for tile, tile_mask, x, y in tiler_fn.tile(scene, mask):
-                if np.sum(tile_mask == idx_tile_type) == tile_width * tile_height:
+                if np.sum(tile_mask == idx_tile_type * 255) == tile_width * tile_height:
                     norm_tile = norm_fn(tile).astype(np.float32)
                     tile_path = (test_scene_out_folder / f'x{x}_y{y}.bin')
                     tile_index_data.append((tile_path.relative_to(out_test_folder.parent), scene_data.scene_id,
@@ -83,7 +101,6 @@ if __name__ == '__main__':
 
                     if tile_type_scene_count == 0:
                         break
-
 
     # Step 4: Storing the tile index file
     pd.DataFrame(tile_index_data,

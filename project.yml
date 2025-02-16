@@ -19,19 +19,28 @@ matrix:
     #   dataset: LandCoverAI
     #   model: Ziz
 
-    # - # Execution 4: LandCoverAI w/ ziz architecture
+    # - # Execution 5: LandCoverAI w/ ziz architecture
     #   dataset: LandCoverAI
     #   model: BiGAN
 
-    - # Execution 4: LandCoverAI w/ ziz architecture
-      dataset: LandCoverAI
-      model: f-AnoGAN
+    # - # Execution 6: LandCoverAI w/ ziz architecture
+    #   dataset: LandCoverAI
+    #   model: f-AnoGAN
+
+    - # Execution 1: LandCoverAI w/ AutoEncoder
+      dataset: HRC_WHU
+      model: AutoEncoder
 
 datasets:
   - name: LandCoverAI
     folder: 'data/download/LandCoverAI'
     params:
       processed_folder: 'data/processed/LandCoverAI'
+
+  - name: HRC_WHU
+    folder: 'data/download/HRC_WHU'
+    params:
+      processed_folder: 'data/processed/HRC_WHU'
 
 
 models:
@@ -41,7 +50,7 @@ models:
       latent_dimension: 1000
       img_width: 32
       img_height: 32
-      pretrained_weights: weights/autoencoder.pth
+      # pretrained_weights: weights/autoencoder.pth
 
   - name: DCGANDiscriminator
     src: 'src/aerial_anomaly_detection/models/utils/dcgan_discriminator.py:Discriminator'
@@ -115,7 +124,34 @@ jobs:
           not_file: '{dataset.params.processed_folder}/tile_index.csv'
 
       - name: Tile partitioning
-        python-module: aerial_anomaly_detection.preprocess.partition.landcover_ai
+        python-module: aerial_anomaly_detection.preprocess.partition.default_partitioning
+        params:
+          train_pct: 0.8
+
+  - name: Preprocess HRC_WHU dataset
+    dataset: HRC_WHU
+    steps:
+
+      - name: Setup HRC_WHU dataset
+        python-module: aerial_anomaly_detection.preprocess.setup.hrc_whu
+        params:
+          test_pct: 0.2
+        if:
+          not_file: '{dataset.params.processed_folder}/scene_index.csv'
+
+      - name: Scene tiling
+        python-module: aerial_anomaly_detection.preprocess.tile.hrc_whu
+        params:
+          tile_width: 32
+          tile_height: 32
+          tile_x_step: 32
+          tile_y_step: 32
+          test_tiles_per_type_and_scene: 10
+        if:
+          not_file: '{dataset.params.processed_folder}/tile_index.csv'
+
+      - name: Tile partitioning
+        python-module: aerial_anomaly_detection.preprocess.partition.default_partitioning
         params:
           train_pct: 0.8
 

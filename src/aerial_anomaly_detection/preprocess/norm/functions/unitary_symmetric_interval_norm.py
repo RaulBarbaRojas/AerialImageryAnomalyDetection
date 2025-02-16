@@ -51,8 +51,7 @@ class UnitarySymmetricIntervalNorm(Norm):
             raise ValueError('[UnitarySymmetricIntervalNorm] Expected a planar image, got an interleaved image (and potentially BGR?).')
 
         norm_image = image.copy().astype(np.float32)
-        norm_image = norm_image / 255
+        norm_image = norm_image / self.scale
         norm_image = 2 * norm_image - 1
 
         return norm_image
-

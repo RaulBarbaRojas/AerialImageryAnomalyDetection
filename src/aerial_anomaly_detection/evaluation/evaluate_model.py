@@ -10,8 +10,7 @@ import pandas as pd
 import torch
 from afml.context import run_ctx
 
-from aerial_anomaly_detection.datasets import DataLoader
-from aerial_anomaly_detection.datasets.landcover_ai import LandCoverAI
+from aerial_anomaly_detection.datasets import DataLoader, Dataset
 from aerial_anomaly_detection.evaluation.datasets.landcover_ai import LandCoverAIModelEvaluator
 from aerial_anomaly_detection.evaluation.datasets.hrc_whu import HRC_WHUModelEvaluator
 from aerial_anomaly_detection.preprocess.norm.functions.unitary_symmetric_interval_norm import UnitarySymmetricIntervalNorm
@@ -31,7 +30,7 @@ if __name__ == '__main__':
 
     match run_ctx.dataset.name:
         case 'LandCoverAI' | 'HRC_WHU':
-            val_dataset = LandCoverAI.load(run_ctx.dataset.params.processed_folder, partition = 'val')
+            val_dataset = Dataset.load(run_ctx.dataset.params.processed_folder, partition = 'val')
         case _:
             raise ValueError(f'[ModelEvaluation] Unknown dataset "{run_ctx.dataset.name}"')
 

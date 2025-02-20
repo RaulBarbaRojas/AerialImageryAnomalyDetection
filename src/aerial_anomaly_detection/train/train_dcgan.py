@@ -19,8 +19,7 @@ import torch
 from afml.context import run_ctx
 from tqdm.auto import tqdm
 
-from aerial_anomaly_detection.datasets import DataLoader
-from aerial_anomaly_detection.datasets.landcover_ai import LandCoverAI
+from aerial_anomaly_detection.datasets import DataLoader, Dataset
 from aerial_anomaly_detection.models.utils import Decoder as Generator
 from aerial_anomaly_detection.models.utils import Discriminator
 
@@ -47,7 +46,7 @@ if __name__ == '__main__':
     (out_folder := Path(run_ctx.params.out_folder)).mkdir(exist_ok = True, parents = True)
     batch_size = run_ctx.params.get('batch_size', 256)
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-    train_dataset = LandCoverAI.load(run_ctx.dataset.params.processed_folder, partition = 'train')
+    train_dataset = Dataset.load(run_ctx.dataset.params.processed_folder, partition = 'train')
     train_dataloader = DataLoader(train_dataset, batch_size = batch_size, shuffle = True, num_workers = os.cpu_count())
 
     # Step 2: Preparing DCGAN model

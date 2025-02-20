@@ -9,8 +9,7 @@ from pathlib import Path
 import torch
 from afml.context import run_ctx
 
-from aerial_anomaly_detection.datasets import DataLoader
-from aerial_anomaly_detection.datasets.landcover_ai import LandCoverAI
+from aerial_anomaly_detection.datasets import DataLoader, Dataset
 from aerial_anomaly_detection.train import ModelTrainer, ZizModelTrainer
 
 
@@ -33,10 +32,10 @@ if __name__ == '__main__':
 
     match run_ctx.dataset.name:
         case 'LandCoverAI' | 'HRC_WHU': # Same dataset interface works for both
-            train_dataset = LandCoverAI.load(processed_dataset_folder, partition = 'train')
+            train_dataset = Dataset.load(processed_dataset_folder, partition = 'train')
             train_dataloader = DataLoader(train_dataset, batch_size = batch_size, shuffle = True, num_workers = os.cpu_count())
 
-            val_dataset = LandCoverAI.load(processed_dataset_folder, partition = 'val')
+            val_dataset = Dataset.load(processed_dataset_folder, partition = 'val')
             val_dataloader = DataLoader(val_dataset, batch_size = batch_size, shuffle = False, num_workers = os.cpu_count())
         case _:
             raise ValueError(f'[ModelTraining] Unknown dataset "{run_ctx.dataset.name}"')

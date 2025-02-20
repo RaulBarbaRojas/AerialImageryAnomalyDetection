@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     # Step 1: Setting up the model
     model : torch.nn.Module = run_ctx.model.build()
-    pretrained_weights_filepath = Path(model.model_settings.get('pretrained_weights', ''))
+    pretrained_weights_filepath = Path(model.model_settings.get('trained_weights', ''))
     if pretrained_weights_filepath.is_file():
         loaded_keys = model.load_state_dict(torch.load(pretrained_weights_filepath, weights_only = True))
         print(f'[ModelEvaluation] {run_ctx.model.name} weights loaded: {loaded_keys}')

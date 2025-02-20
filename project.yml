@@ -27,9 +27,25 @@ matrix:
     #   dataset: LandCoverAI
     #   model: f-AnoGAN
 
-    - # Execution 1: LandCoverAI w/ AutoEncoder
+    - # Execution 7: LandCoverAI w/ AutoEncoder
       dataset: HRC_WHU
       model: AutoEncoder
+
+    # - # Execution 8: LandCoverAI w/ DCGAN discriminator
+    #   dataset: HRC_WHU
+    #   model: DCGANDiscriminator
+
+    # - # Execution 9: LandCoverAI w/ izi architecture
+    #   dataset: HRC_WHU
+    #   model: Izi
+
+    # - # Execution 10: LandCoverAI w/ ziz architecture
+    #   dataset: HRC_WHU
+    #   model: Ziz
+
+    # - # Execution 11: LandCoverAI w/ ziz architecture
+    #   dataset: HRC_WHU
+    #   model: BiGAN
 
 datasets:
   - name: LandCoverAI
@@ -42,7 +58,6 @@ datasets:
     params:
       processed_folder: 'data/processed/HRC_WHU'
 
-
 models:
   - name: AutoEncoder
     src: 'src/aerial_anomaly_detection/models/autoencoder.py:AutoEncoder'
@@ -50,14 +65,14 @@ models:
       latent_dimension: 1000
       img_width: 32
       img_height: 32
-      # pretrained_weights: weights/autoencoder.pth
+      trained_weights: '{run_folder}/AutoEncoder/{matrix.run.dataset}/train/best.pth'
 
   - name: DCGANDiscriminator
     src: 'src/aerial_anomaly_detection/models/utils/dcgan_discriminator.py:Discriminator'
     params:
       img_width: 32
       img_height: 32
-      pretrained_weights: 'runs/DCGAN/LandCoverAI/train/epoch_200/discriminator.pth'
+      trained_weights: '{run_folder}/DCGAN/{matrix.run.dataset}/train/epoch_{n_epochs}/discriminator.pth'
 
   - name: Izi
     src: 'src/aerial_anomaly_detection/models/izi.py:Izi'
@@ -65,8 +80,8 @@ models:
       latent_dimension: 1000
       img_width: 32
       img_height: 32
-      pretrained_decoder_weights_path: 'models/DCGAN/generator.pth'
-      pretrained_weights: weights/izi.pth
+      pretrained_decoder_weights_path: '{run_folder}/DCGAN/{matrix.run.dataset}/train/epoch_{n_epochs}/generator.pth'
+      trained_weights: '{run_folder}/Izi/{matrix.run.dataset}/train/best.pth'
 
   - name: Ziz
     src: 'src/aerial_anomaly_detection/models/ziz.py:Ziz'
@@ -74,8 +89,8 @@ models:
       latent_dimension: 1000
       img_width: 32
       img_height: 32
-      pretrained_decoder_weights_path: 'models/DCGAN/generator.pth'
-      pretrained_weights: weights/ziz.pth
+      pretrained_decoder_weights_path: '{run_folder}/DCGAN/{matrix.run.dataset}/train/epoch_{n_epochs}/generator.pth'
+      trained_weights: '{run_folder}/Ziz/{matrix.run.dataset}/train/best.pth'
 
   - name: BiGAN
     src: 'src/aerial_anomaly_detection/models/bigan.py:BiGAN'
@@ -83,9 +98,9 @@ models:
       latent_dimension: 1000
       img_width: 32
       img_height: 32
-      pretrained_encoder_weights_path: 'models/BiGAN/encoder.pth'
-      pretrained_generator_weights_path: 'models/BiGAN/generator.pth'
-      pretrained_discriminator_weights_path: 'models/BiGAN/discriminator.pth'
+      pretrained_encoder_weights_path: '{run_folder}/BiGAN/{matrix.run.dataset}/train/epoch_{n_epochs}/encoder.pth'
+      pretrained_generator_weights_path: '{run_folder}/BiGAN/{matrix.run.dataset}/train/epoch_{n_epochs}/generator.pth'
+      pretrained_discriminator_weights_path: '{run_folder}/BiGAN/{matrix.run.dataset}/train/epoch_{n_epochs}/discriminator.pth'
 
   - name: f-AnoGAN
     src: 'src/aerial_anomaly_detection/models/f_anogan.py:FAnoGAN'
@@ -93,14 +108,14 @@ models:
       latent_dimension: 1000
       img_width: 32
       img_height: 32
-      pretrained_decoder_weights_path: 'models/DCGAN/generator.pth'
-      pretrained_discriminator_weights_path: 'models/DCGAN/discriminator.pth'
-      pretrained_weights: weights/f_anogan.pth
+      pretrained_decoder_weights_path: '{run_folder}/DCGAN/{matrix.run.dataset}/train/epoch_{n_epochs}/generator.pth'
+      pretrained_discriminator_weights_path: '{run_folder}/DCGAN/{matrix.run.dataset}/train/epoch_{n_epochs}/discriminator.pth'
+      trained_weights: '{run_folder}/f-AnoGAN/{matrix.run.dataset}/train/best.pth'
 
 params:
   run_folder: 'runs'
   batch_size: 256
-  n_epochs: 200
+  n_epochs: 5
 
 jobs:
   - name: Preprocess LandCover.ai dataset
@@ -155,11 +170,11 @@ jobs:
         params:
           train_pct: 0.8
 
-  - name: Train DCGAN
-    dataset: LandCoverAI
+  - name: Train DCGAN components
+    dataset: '{matrix.run.dataset}'
     steps:
     - name: DCGAN Training
-      python-module: aerial_anomaly_detection.train.landcover_ai_dcgan
+      python-module: aerial_anomaly_detection.train.train_dcgan
       params:
         out_folder: '{run_folder}/DCGAN/{dataset.name}/train'
         latent_dimension: 1000
@@ -170,12 +185,14 @@ jobs:
         epochs_per_save: 10
         num_evaluation_images: 64
         learning_rate: 0.0001
+    if:
+      not_file: '{run_folder}/DCGAN/{dataset.name}/epoch_{n_epochs}/sampled_generated_images.png'
 
   - name: Train BiGAN components
-    dataset: LandCoverAI
+    dataset: '{matrix.run.dataset}'
     steps:
     - name: BiGAN Training
-      python-module: aerial_anomaly_detection.train.landcover_ai_bigan
+      python-module: aerial_anomaly_detection.train.train_bigan
       params:
         out_folder: '{run_folder}/BiGAN/{dataset.name}/train'
         latent_dimension: 1000
@@ -186,6 +203,8 @@ jobs:
         epochs_per_save: 10
         num_evaluation_images: 64
         learning_rate: 0.0001
+    if:
+      not_file: '{run_folder}/BiGAN/{dataset.name}/epoch_{n_epochs}/sampled_generated_images.png'
 
   - name: Train anomaly detectors
     dataset: '{matrix.run.dataset}'

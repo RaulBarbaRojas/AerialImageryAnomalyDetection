@@ -7,6 +7,7 @@ data
 
 # Runs folder
 runs/
+runs_old/
 
 # Models folder
 models/*

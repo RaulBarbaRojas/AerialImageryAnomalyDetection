@@ -129,24 +129,30 @@ if __name__ == '__main__':
             torch.save(generator.state_dict(), epoch_out_folder / 'generator.pth')
             torch.save(discriminator.state_dict(), epoch_out_folder / 'discriminator.pth')
 
-            with torch.inference_mode():
-                generated_images = generator(fixed_noise_vector).cpu().numpy()
-                generated_images = (((generated_images + 1) / 2) * 255).astype(np.uint8)
-
-                num_plots_per_row = int(math.sqrt(fixed_noise_vector.shape[0]))
-                _, axs = plt.subplots(nrows = num_plots_per_row,
-                                      ncols = num_plots_per_row,
-                                      figsize = (20, 20))
-                for idx_image in range(fixed_noise_vector.shape[0]):
-                    ax = axs[idx_image // num_plots_per_row, idx_image % num_plots_per_row]
-                    ax.imshow(generated_images[idx_image, ...].squeeze().transpose(1, 2, 0))
-                    ax.axis('off')
-
-                plt.margins(0, 0)
-                plt.gca().set_xticks([])
-                plt.gca().set_yticks([])
-                plt.savefig(epoch_out_folder / 'sample_generated_images.png')
-                plt.close()
-
         print(f'Epoch {epoch} | Discriminator loss: {discriminator_batch_loss.item():.6f} | '
               f'Generator loss: {generator_batch_loss.item():.6f}')
+
+    # Step 3: Storing final results
+    generator.eval()
+    discriminator.eval()
+    (epoch_out_folder := out_folder / f'epoch_{epoch}').mkdir(exist_ok = True, parents = True)
+    torch.save(generator.state_dict(), epoch_out_folder / 'generator.pth')
+    torch.save(discriminator.state_dict(), epoch_out_folder / 'discriminator.pth')
+    with torch.inference_mode():
+        generated_images = generator(fixed_noise_vector).cpu().numpy()
+        generated_images = (((generated_images + 1) / 2) * 255).astype(np.uint8)
+
+        num_plots_per_row = int(math.sqrt(fixed_noise_vector.shape[0]))
+        _, axs = plt.subplots(nrows = num_plots_per_row,
+                                ncols = num_plots_per_row,
+                                figsize = (20, 20))
+        for idx_image in range(fixed_noise_vector.shape[0]):
+            ax = axs[idx_image // num_plots_per_row, idx_image % num_plots_per_row]
+            ax.imshow(generated_images[idx_image, ...].squeeze().transpose(1, 2, 0))
+            ax.axis('off')
+
+        plt.margins(0, 0)
+        plt.gca().set_xticks([])
+        plt.gca().set_yticks([])
+        plt.savefig(epoch_out_folder / 'sample_generated_images.png')
+        plt.close()

@@ -21,7 +21,8 @@ class ModelEvaluator(ABC):
 
 
     def __init__(self, model : torch.nn.Module, validation_dataloader : DataLoader,
-                 reconstruction_error_fn : Callable[[torch.nn.Module, torch.Tensor, torch.Tensor, torch.Tensor], float]) -> None:
+                 reconstruction_error_fn : Callable[[torch.nn.Module, torch.Tensor, torch.Tensor, torch.Tensor], float],
+                 num_errors_per_scene : int = 48) -> None:
         """
         Constructor method for the model evaluator class.
 
@@ -30,12 +31,14 @@ class ModelEvaluator(ABC):
             validation_dataloader (DataLoader): the validation dataloader containing data to calculate the reconstruction error threshold.
             reconstruction_error_fn (Callable[[Any], float]): the function to calculate the reconstruction error threshold,\
                 from the model, the input tensor X, the predicted output y_pred, and the ground truth label of the input y.
+            num_errors_per_scene (int): the number of wrong predictions per scene to be visualized (by default 16).
         """
 
         # Step 1: Setting the base attributes
         self.model = model
         self.validation_dataloader = validation_dataloader
         self.reconstruction_error_fn = reconstruction_error_fn
+        self.num_errors_per_scene = num_errors_per_scene
 
         # Step 2: Setting up device agnostic code
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')

@@ -52,6 +52,8 @@ if __name__ == '__main__':
             raise ValueError(f'[ModelEvaluation] Unknown model "{run_ctx.model.name}"')
 
     # Step 3: Setting up model evaluator
+    num_errors_per_scene = run_ctx.params.get('num_errors_per_scene', 48)
+
     match run_ctx.dataset.name:
         case 'LandCoverAI':
             model_evaluator = LandCoverAIModelEvaluator(model = model,
@@ -64,7 +66,8 @@ if __name__ == '__main__':
                                                         tile_y_step = run_ctx.params.get('tile_y_step', 32),
                                                         input_folder = run_ctx.dataset.folder,
                                                         output_folder = run_ctx.params.out_folder,
-                                                        scene_df = pd.read_csv(Path(run_ctx.dataset.params.processed_folder) / 'scene_index.csv'))
+                                                        scene_df = pd.read_csv(Path(run_ctx.dataset.params.processed_folder) / 'scene_index.csv'),
+                                                        num_errors_per_scene = num_errors_per_scene)
         case 'HRC_WHU':
             model_evaluator = HRC_WHUModelEvaluator(model = model,
                                                     validation_dataloader = val_dataloader,
@@ -76,7 +79,8 @@ if __name__ == '__main__':
                                                     tile_y_step = run_ctx.params.get('tile_y_step', 32),
                                                     input_folder = run_ctx.dataset.folder,
                                                     output_folder = run_ctx.params.out_folder,
-                                                    scene_df = pd.read_csv(Path(run_ctx.dataset.params.processed_folder) / 'scene_index.csv'))
+                                                    scene_df = pd.read_csv(Path(run_ctx.dataset.params.processed_folder) / 'scene_index.csv'),
+                                                    num_errors_per_scene = num_errors_per_scene)
         case _:
             raise ValueError(f'[ModelEvaluation] Unknown dataset "{run_ctx.dataset.name}"')
 

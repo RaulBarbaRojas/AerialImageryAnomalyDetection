@@ -228,6 +228,7 @@ jobs:
     model: '{matrix.run.model}'
     params:
       out_folder: '{run_folder}/{model.name}/{dataset.name}/inference'
+      num_errors_per_scene: 32 # Number of wrongly predicted tiles to be visualised (visual evaluation)
     steps:
       - name: Generic model evaluation
         python-module: aerial_anomaly_detection.evaluation.evaluate_model

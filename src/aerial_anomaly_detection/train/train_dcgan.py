@@ -19,8 +19,7 @@ import torch
 from afml.context import run_ctx
 from tqdm.auto import tqdm
 
-from aerial_anomaly_detection.datasets import DataLoader
-from aerial_anomaly_detection.datasets.landcover_ai import LandCoverAI
+from aerial_anomaly_detection.datasets import DataLoader, Dataset
 from aerial_anomaly_detection.models.utils import Decoder as Generator
 from aerial_anomaly_detection.models.utils import Discriminator
 
@@ -47,7 +46,7 @@ if __name__ == '__main__':
     (out_folder := Path(run_ctx.params.out_folder)).mkdir(exist_ok = True, parents = True)
     batch_size = run_ctx.params.get('batch_size', 256)
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-    train_dataset = LandCoverAI.load(run_ctx.dataset.params.processed_folder, partition = 'train')
+    train_dataset = Dataset.load(run_ctx.dataset.params.processed_folder, partition = 'train')
     train_dataloader = DataLoader(train_dataset, batch_size = batch_size, shuffle = True, num_workers = os.cpu_count())
 
     # Step 2: Preparing DCGAN model
@@ -130,24 +129,30 @@ if __name__ == '__main__':
             torch.save(generator.state_dict(), epoch_out_folder / 'generator.pth')
             torch.save(discriminator.state_dict(), epoch_out_folder / 'discriminator.pth')
 
-            with torch.inference_mode():
-                generated_images = generator(fixed_noise_vector).cpu().numpy()
-                generated_images = (((generated_images + 1) / 2) * 255).astype(np.uint8)
-
-                num_plots_per_row = int(math.sqrt(fixed_noise_vector.shape[0]))
-                _, axs = plt.subplots(nrows = num_plots_per_row,
-                                      ncols = num_plots_per_row,
-                                      figsize = (20, 20))
-                for idx_image in range(fixed_noise_vector.shape[0]):
-                    ax = axs[idx_image // num_plots_per_row, idx_image % num_plots_per_row]
-                    ax.imshow(generated_images[idx_image, ...].squeeze().transpose(1, 2, 0))
-                    ax.axis('off')
-
-                plt.margins(0, 0)
-                plt.gca().set_xticks([])
-                plt.gca().set_yticks([])
-                plt.savefig(epoch_out_folder / 'sample_generated_images.png')
-                plt.close()
-
         print(f'Epoch {epoch} | Discriminator loss: {discriminator_batch_loss.item():.6f} | '
               f'Generator loss: {generator_batch_loss.item():.6f}')
+
+    # Step 3: Storing final results
+    generator.eval()
+    discriminator.eval()
+    (epoch_out_folder := out_folder / f'epoch_{epoch}').mkdir(exist_ok = True, parents = True)
+    torch.save(generator.state_dict(), epoch_out_folder / 'generator.pth')
+    torch.save(discriminator.state_dict(), epoch_out_folder / 'discriminator.pth')
+    with torch.inference_mode():
+        generated_images = generator(fixed_noise_vector).cpu().numpy()
+        generated_images = (((generated_images + 1) / 2) * 255).astype(np.uint8)
+
+        num_plots_per_row = int(math.sqrt(fixed_noise_vector.shape[0]))
+        _, axs = plt.subplots(nrows = num_plots_per_row,
+                                ncols = num_plots_per_row,
+                                figsize = (20, 20))
+        for idx_image in range(fixed_noise_vector.shape[0]):
+            ax = axs[idx_image // num_plots_per_row, idx_image % num_plots_per_row]
+            ax.imshow(generated_images[idx_image, ...].squeeze().transpose(1, 2, 0))
+            ax.axis('off')
+
+        plt.margins(0, 0)
+        plt.gca().set_xticks([])
+        plt.gca().set_yticks([])
+        plt.savefig(epoch_out_folder / 'sample_generated_images.png')
+        plt.close()

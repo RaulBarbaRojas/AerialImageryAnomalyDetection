@@ -1,5 +1,5 @@
 """
-Generic module to evaluate a model over the LandCover.ai dataset.
+Generic module to evaluate a model over the HRC_WHU dataset.
 """
 
 
@@ -20,9 +20,9 @@ from aerial_anomaly_detection.evaluation.metrics import accuracy, f1, precision,
 from aerial_anomaly_detection.preprocess.norm.functions import Norm
 
 
-class LandCoverAIModelEvaluator(ModelEvaluator):
+class HRC_WHUModelEvaluator(ModelEvaluator):
     """
-    A class to evaluate a given model with the LandCover.ai dataset.
+    A class to evaluate a given model with the HRC_WHU dataset.
     """
 
 
@@ -30,7 +30,7 @@ class LandCoverAIModelEvaluator(ModelEvaluator):
                  tile_y_step : int, input_folder : str | Path, output_folder : str | Path,
                  scene_df : DataFrame, *args : Tuple[Any, ...], **kwargs : Dict[str, Any]):
         """
-        Constructor method for the LandCoverAIModelEvaluator class.
+        Constructor method for the HRC_WHUModelEvaluator class.
 
         Args:
             norm_fn (Norm): the normalization function to be applied on the tiles.
@@ -53,8 +53,8 @@ class LandCoverAIModelEvaluator(ModelEvaluator):
         self.tile_height = tile_height
         self.tile_x_step = tile_x_step
         self.tile_y_step = tile_y_step
-        self.input_scene_folder = Path(input_folder) / 'images'
-        self.input_mask_folder = Path(input_folder) / 'masks'
+        self.input_scene_folder = Path(input_folder) / 'HRC_WHU'
+        self.input_mask_folder = Path(input_folder) / 'HRC_WHU'
         self.output_folder = Path(output_folder)
         self.scene_df = scene_df[scene_df['partition'] == 'test']
 
@@ -89,8 +89,8 @@ class LandCoverAIModelEvaluator(ModelEvaluator):
                                 dynamic_ncols = True):
 
                 # Step 2.1: Reading scene information
-                scene = rasterio.open(self.input_scene_folder / scene_id).read().astype(np.uint8)
-                mask = rasterio.open(self.input_mask_folder / scene_id).read().squeeze()
+                scene = rasterio.open(self.input_scene_folder / scene_id).read().astype(np.uint8)[:, :650, :]
+                mask = rasterio.open(self.input_mask_folder / f'{Path(scene_id).stem}_ReferenceMask.tif').read().squeeze()[:650, ...]
                 pred_mask = np.zeros_like(mask)
                 scene_confussion_matrix = np.zeros_like(global_confussion_matrix)
                 scene_missed_predictions : List[Tuple[NDArray[np.uint8], NDArray[np.uint8], NDArray[np.uint8]]] = []
@@ -111,7 +111,7 @@ class LandCoverAIModelEvaluator(ModelEvaluator):
                         tile = self.norm_fn(tile)
                         tile = torch.from_numpy(tile).unsqueeze(0).to(self.device)
                         tile_mask = mask[y_coord : y_coord + self.tile_height, x_coord : x_coord + self.tile_width]
-                        ground_truth_anomaly = int(int(np.sum(tile_mask != 3)) > (self.tile_width * self.tile_height / 2))
+                        ground_truth_anomaly = int(int(np.sum(tile_mask != 255)) > (self.tile_width * self.tile_height / 2))
 
                         y_pred = self.model(tile, mode = 'inference')
 
@@ -125,11 +125,11 @@ class LandCoverAIModelEvaluator(ModelEvaluator):
 
                         if ground_truth_anomaly != pred_anomaly and len(scene_missed_predictions) < self.num_errors_per_scene:
                             scene_missed_predictions.append((scene[:, y_coord : y_coord + self.tile_height,
-                                                                    x_coord : x_coord + self.tile_width],
-                                                                np.full((self.tile_height, self.tile_width),
-                                                                        ground_truth_anomaly * 255).astype(np.uint8),
-                                                                np.full((self.tile_height, self.tile_width),
-                                                                        pred_anomaly * 255).astype(np.uint8),
+                                                                   x_coord : x_coord + self.tile_width],
+                                                             np.full((self.tile_height, self.tile_width),
+                                                                     ground_truth_anomaly * 255).astype(np.uint8),
+                                                             np.full((self.tile_height, self.tile_width),
+                                                                     pred_anomaly * 255).astype(np.uint8),
                                                             ))
 
                 # Step 2.3: Storing mask and metrics per scene
@@ -156,7 +156,7 @@ class LandCoverAIModelEvaluator(ModelEvaluator):
                                     width=mask.shape[1],
                                     count=1,
                                     dtype=np.uint8) as mask_writer:
-                    processed_mask = ((mask != 3) * 255).astype(np.uint8)
+                    processed_mask = ((mask != 255) * 255).astype(np.uint8)
                     mask_writer.write(processed_mask, 1)
                     plt.figure(figsize = (10, 7))
                     plt.imshow(processed_mask)
@@ -178,7 +178,7 @@ class LandCoverAIModelEvaluator(ModelEvaluator):
 
                 # Step 2.4: Storing missed predictions
                 if self.num_errors_per_scene > 0:
-                    _, axs = plt.subplots(self.num_errors_per_scene, 3, figsize = (20, 80))
+                    _, axs = plt.subplots(self.num_errors_per_scene, 3, figsize = (20, 40))
 
                     for idx_wrong_prediction in range(len(scene_missed_predictions)):
                         axs[idx_wrong_prediction, 0].imshow(scene_missed_predictions[idx_wrong_prediction][0].transpose(1, 2, 0))
@@ -195,6 +195,7 @@ class LandCoverAIModelEvaluator(ModelEvaluator):
                         axs[idx_wrong_prediction, 2].set_title('Prediction')
                         axs[idx_wrong_prediction, 2].axis(False)
 
+                    plt.suptitle(f'[Scene={scene_id}] Wrong Predictions')
                     plt.tight_layout()
                     plt.savefig(out_true_wrong_preds_folder / f'{scene_id}.png')
                     plt.close()

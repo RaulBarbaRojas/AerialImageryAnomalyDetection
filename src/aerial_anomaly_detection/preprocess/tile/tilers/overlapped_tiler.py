@@ -1,30 +1,30 @@
 """
-Module to implement the LandCover.ai dataset tiler strategy.
+Module to implement the overlapped tiler strategy (overlapped tiling).
 """
 
 from typing import Generator, Tuple
 
 from numpy.typing import NDArray
 
-from aerial_anomaly_detection.preprocess.tile import Tiler
+from aerial_anomaly_detection.preprocess.tile.tilers import Tiler
 
 
-class LandCoverAITiler(Tiler):
+class OverlappedTiler(Tiler):
     """
-    A class to implement the LandCoverAI tiler.
+    A class to implement the overlapped tiler.
     """
 
 
     def tile(self, image : NDArray, mask : NDArray) -> Generator[Tuple[NDArray, NDArray, int, int], None, None]:
         """
-        Method to implement the LandCover.ai tiling strategy.
+        Method to implement the overlapped tiling strategy.
 
         Args:
-            image (NDArray): the image to be tiled in the LandCover.ai format (CxHxW).
-            mask (NDArray): the mask to be tiled in the LandCover.ai format (HxW).
+            image (NDArray): the image to be tiled in the format (CxHxW).
+            mask (NDArray): the mask to be tiled in the format (HxW).
 
         Returns:
-            A generator that yields LandCover.ai tiles and their (x, y) coordinates.
+            A generator that yields tiles and their (x, y) coordinates.
         """
         for y_coord in range(0, image.shape[1], self.y_step):
             for x_coord in range(0, image.shape[2], self.x_step):

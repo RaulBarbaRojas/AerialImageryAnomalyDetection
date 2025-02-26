@@ -25,7 +25,7 @@ class ModelTrainer:
 
 
     def __init__(self, model : torch.nn.Module, train_dataloader : DataLoader, val_dataloader : DataLoader,
-                 test_dataloader : DataLoader, loss_calculation_fn : Callable[[torch.nn.Module, NDArray, NDArray, NDArray], float],
+                 loss_calculation_fn : Callable[[torch.nn.Module, NDArray, NDArray, NDArray], float],
                  optimizer : torch.optim.Optimizer, device : torch.device, output_folder : str | Path) -> None:
         """
         Constructor method for the ModelTrainer class.
@@ -34,8 +34,6 @@ class ModelTrainer:
             model (torch.nn.Module): the model to be trained.
             train_dataloader (DataLoader): the train dataloader containing training data.
             train_dataloader (DataLoader): the train dataloader containing validation data.
-            test_dataloader (DataLoader): the train dataloader containing test data. Note that test\
-                data is NEVER used for model selection and is simply used to check model performance in real time.
             loss_calculation_fn (Callable[[torch.nn.Module, NDArray, NDArray, NDArray], float]): a function to calculate\
                 the loss based on the model, input data, predicted data and input data ground truth (typically anomaly class).
             optimizer (torch.nn.Optimizer): the optimizer to be used for improving the model and reducing the loss.
@@ -47,7 +45,6 @@ class ModelTrainer:
         self.model = model
         self.train_dataloader = train_dataloader
         self.val_dataloader = val_dataloader
-        self.test_dataloader = test_dataloader
         self.loss_calculation_fn = loss_calculation_fn
         self.optimizer = optimizer
         self.device = device
@@ -114,54 +111,14 @@ class ModelTrainer:
         return {'val_loss' : epoch_val_loss}
 
 
-    def _test_step(self, reconstruction_error_threshold : float) -> Dict[str, Any]:
-        """
-        Method to carry out the train step during the epoch.
-        NOTE: the test step is simply used for checking model performance in real time.\
-              Test information is NEVER used for model selection as can be seen from the code.
-
-        Args:
-            reconstruction_error_threshold (float): the reconstruction error threshold used for anomaly prediction.
-
-        Returns:
-            A dictionary containing relevant test metadata, such as model performance metrics.
-        """
-        test_metadata : Dict[str, Any] = {}
-        confussion_matrix = np.zeros((2, 2))
-
-        self.model.eval()
-        with torch.inference_mode():
-            for _, X, y in tqdm(self.test_dataloader,
-                                desc = 'Testing model performance on dummy test dataset',
-                                unit = 'batch',
-                                dynamic_ncols = True,
-                                file = sys.stdout,
-                                leave = True):
-                X = X.to(self.device)
-                y_pred = self.model(X, mode = 'inference') # Mode is added only for models that require it (ignored in the rest)
-                loss = self.loss_calculation_fn(self.model, X, y_pred, y).item()
-                pred_anomaly = int(loss > reconstruction_error_threshold)
-                ground_truth_anomaly = int(y != 3)
-                confussion_matrix[ground_truth_anomaly, pred_anomaly] += 1
-
-        test_metadata['confussion_matrix'] = confussion_matrix
-        test_metadata['test_accuracy'] = accuracy(confussion_matrix)
-        test_metadata['test_precision'] = precision(confussion_matrix)
-        test_metadata['test_recall'] = recall(confussion_matrix)
-        test_metadata['test_f1'] = f1(confussion_matrix)
-
-        return test_metadata
-
-
     def _train_one_epoch(self) -> Dict[str, Any]:
         """
         Method to train the given model during an epoch.
         """
         train_metadata = self._train_step()
         val_metadata = self._validation_step()
-        test_metadata = self._test_step(val_metadata['val_loss'])
 
-        return train_metadata | val_metadata | test_metadata
+        return train_metadata | val_metadata
 
 
     def train_n_epochs(self, n_epochs : int) -> Dict[int, Dict[str, Any]]:
@@ -187,11 +144,7 @@ class ModelTrainer:
                 self._save_model('best')
 
             print(f'Epoch {epoch} | Train loss: {self.train_history[epoch]['train_loss']:.6f} | '
-                  f'Validation loss: {self.train_history[epoch]['val_loss']:.6f} | '
-                  f'Test accuracy: {self.train_history[epoch]['test_accuracy']:.6f} | '
-                  f'Test precision: {self.train_history[epoch]['test_precision']:.6f} | '
-                  f'Test recall: {self.train_history[epoch]['test_recall']:.6f} | '
-                  f'Test F1: {self.train_history[epoch]['test_f1']:.6f}')
+                  f'Validation loss: {self.train_history[epoch]['val_loss']:.6f}')
 
         return self.train_history
 

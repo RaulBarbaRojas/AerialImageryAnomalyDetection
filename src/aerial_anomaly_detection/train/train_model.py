@@ -9,8 +9,7 @@ from pathlib import Path
 import torch
 from afml.context import run_ctx
 
-from aerial_anomaly_detection.datasets import DataLoader
-from aerial_anomaly_detection.datasets.landcover_ai import LandCoverAI
+from aerial_anomaly_detection.datasets import DataLoader, Dataset
 from aerial_anomaly_detection.train import ModelTrainer, ZizModelTrainer
 
 
@@ -32,15 +31,12 @@ if __name__ == '__main__':
     batch_size = run_ctx.params.batch_size
 
     match run_ctx.dataset.name:
-        case 'LandCoverAI':
-            train_dataset = LandCoverAI.load(processed_dataset_folder, partition = 'train')
+        case 'LandCoverAI' | 'HRC_WHU': # Same dataset interface works for both
+            train_dataset = Dataset.load(processed_dataset_folder, partition = 'train')
             train_dataloader = DataLoader(train_dataset, batch_size = batch_size, shuffle = True, num_workers = os.cpu_count())
 
-            val_dataset = LandCoverAI.load(processed_dataset_folder, partition = 'val')
+            val_dataset = Dataset.load(processed_dataset_folder, partition = 'val')
             val_dataloader = DataLoader(val_dataset, batch_size = batch_size, shuffle = False, num_workers = os.cpu_count())
-
-            test_dataset = LandCoverAI.load(processed_dataset_folder, partition = 'test')
-            test_dataloader = DataLoader(test_dataset, batch_size = 1, shuffle = False)
         case _:
             raise ValueError(f'[ModelTraining] Unknown dataset "{run_ctx.dataset.name}"')
 
@@ -64,6 +60,9 @@ if __name__ == '__main__':
             loss_calculation_fn = lambda model, X, y_pred, y: loss_fn(X, y_pred[0]) + loss_fn(y_pred[1], y_pred[2])
             optimizer = torch.optim.Adam(params = filter(lambda param: param.requires_grad, model.parameters()), lr = learning_rate)
             model_trainer_class = ModelTrainer
+        case 'BiGAN' | 'DCGANDiscriminator':
+            print('[ModelTraining] Model should be already trained. Skipping training step...')
+            exit()
         case _:
             raise ValueError(f'[ModelTraining] Unknown model "{run_ctx.dataset.name}"')
 
@@ -72,7 +71,6 @@ if __name__ == '__main__':
     model_trainer = model_trainer_class(model = model,
                                         train_dataloader = train_dataloader,
                                         val_dataloader = val_dataloader,
-                                        test_dataloader = test_dataloader,
                                         loss_calculation_fn = loss_calculation_fn,
                                         optimizer = optimizer,
                                         device = device,

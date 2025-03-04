@@ -1,8 +1,8 @@
 """
-Module to implement the izi architecture for anomaly detection on aerial imagery.
+Module to implement the f-AnoGAN architecture for anomaly detection on aerial imagery.
 
-Cite: Contreras-Cruz, M. A., Correa-Tome, F. E., Lopez-Padilla, R., & Ramirez-Paredes, J. P. (2023).\
-Generative Adversarial Networks for anomaly detection in aerial images. Computers and Electrical Engineering, 106, 108470.
+Cite: Schlegl, T., Seeböck, P., Waldstein, S. M., Langs, G., & Schmidt-Erfurth, U. (2019). \
+f-AnoGAN: Fast unsupervised anomaly detection with generative adversarial networks. Medical image analysis, 54, 30-44.
 """
 
 
@@ -26,10 +26,10 @@ class FAnoGAN(torch.nn.Module):
                  pretrained_discriminator_weights_path : str | Path ,
                  **model_settings : Dict[str, Any]) -> None:
         """
-        Constructor method of the Izi class.
+        Constructor method of the f-AnoGAN class.
 
         Args:
-            latent_dimension (int): the size of the latent dimension of the izi architecture.
+            latent_dimension (int): the size of the latent dimension of the f-AnoGAN architecture.
             img_width (int): the width of the input (and output) images.
             img_height (int): the height of the input (and output) images.
             pretrained_decoder_weights_path (str | Path): the pre-trained weights of the decoder.

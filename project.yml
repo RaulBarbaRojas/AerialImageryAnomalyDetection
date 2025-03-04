@@ -27,29 +27,37 @@ matrix:
       dataset: LandCoverAI
       model: f-AnoGAN
 
-    - # Execution 7: HRC_WHU w/ AutoEncoder
+    - # Execution 7: LandCoverAI w/ DualAnoDAE architecture
+      dataset: LandCoverAI
+      model: DualAnoDAE
+
+    - # Execution 8: HRC_WHU w/ AutoEncoder
       dataset: HRC_WHU
       model: AutoEncoder
 
-    - # Execution 8: HRC_WHU w/ DCGAN discriminator
+    - # Execution 9: HRC_WHU w/ DCGAN discriminator
       dataset: HRC_WHU
       model: DCGANDiscriminator
 
-    - # Execution 9: HRC_WHU w/ izi architecture
+    - # Execution 10: HRC_WHU w/ izi architecture
       dataset: HRC_WHU
       model: Izi
 
-    - # Execution 10: HRC_WHU w/ ziz architecture
+    - # Execution 11: HRC_WHU w/ ziz architecture
       dataset: HRC_WHU
       model: Ziz
 
-    - # Execution 11: HRC_WHU w/ BiGAN architecture
+    - # Execution 12: HRC_WHU w/ BiGAN architecture
       dataset: HRC_WHU
       model: BiGAN
 
-    - # Execution 12: HRC_WHU w/ f-AnoGAN architecture
+    - # Execution 13: HRC_WHU w/ f-AnoGAN architecture
       dataset: HRC_WHU
       model: f-AnoGAN
+
+    - # Execution 14: LandCoverAI w/ DualAnoDAE architecture
+      dataset: HRC_WHU
+      model: DualAnoDAE
 
 datasets:
   - name: LandCoverAI
@@ -115,6 +123,31 @@ models:
       pretrained_decoder_weights_path: '{run_folder}/DCGAN/{matrix.run.dataset}/train/epoch_{n_epochs}/generator.pth'
       pretrained_discriminator_weights_path: '{run_folder}/DCGAN/{matrix.run.dataset}/train/epoch_{n_epochs}/discriminator.pth'
       trained_weights: '{run_folder}/f-AnoGAN/{matrix.run.dataset}/train/best.pth'
+
+  - name: LowLevelAnoDAE
+    src: 'src/aerial_anomaly_detection/models/dual_ae.py:LowLevelAnoDAE'
+    params:
+      latent_dimension: 1000
+      img_width: 32
+      img_height: 32
+      trained_weights: '{run_folder}/LowLevelAnoDAE/{matrix.run.dataset}/train/best.pth'
+
+  - name: HighLevelAnoDAE
+    src: 'src/aerial_anomaly_detection/models/dual_ae.py:HighLevelAnoDAE'
+    params:
+      latent_dimension: 1000
+      img_width: 32
+      img_height: 32
+      trained_weights: '{run_folder}/HighLevelAnoDAE/{matrix.run.dataset}/train/best.pth'
+
+  - name: DualAnoDAE
+    src: 'src/aerial_anomaly_detection/models/dual_ae.py:DualAnoDAE'
+    params:
+      latent_dimension: 1000
+      img_width: 32
+      img_height: 32
+      low_level_anodae_weights: '{run_folder}/LowLevelAnoDAE/{matrix.run.dataset}/train/best.pth'
+      high_level_anodae_weights: '{run_folder}/HighLevelAnoDAE/{matrix.run.dataset}/train/best.pth'
 
 params:
   run_folder: 'runs'
@@ -209,6 +242,25 @@ jobs:
         learning_rate: 0.0001
     if:
       not_file: '{run_folder}/BiGAN/{dataset.name}/train/epoch_{n_epochs}/sample_generated_images.png'
+
+  - name: Train DualAnoDAE components
+    dataset: '{matrix.run.dataset}'
+    steps:
+      - name: Low Level AnoDAE Training
+        model: LowLevelAnoDAE
+        python-module: aerial_anomaly_detection.train.train_model
+        params:
+          learning_rate: 0.0001
+        if:
+          not_file: '{run_folder}/{model.name}/{dataset.name}/train/train_history.pkl'
+
+      - name: High Level AnoDAE Training
+        model: HighLevelAnoDAE
+        python-module: aerial_anomaly_detection.train.train_model
+        params:
+          learning_rate: 0.0001
+        if:
+          not_file: '{run_folder}/{model.name}/{dataset.name}/train/train_history.pkl'
 
   - name: Train anomaly detectors
     dataset: '{matrix.run.dataset}'

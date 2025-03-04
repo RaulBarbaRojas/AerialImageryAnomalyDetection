@@ -45,7 +45,7 @@ if __name__ == '__main__':
     learning_rate = run_ctx.params.get('learning_rate', 0.0001)
 
     match run_ctx.model.name:
-        case 'AutoEncoder' | 'Izi':
+        case 'AutoEncoder' | 'Izi' | 'LowLevelAnoDAE' | 'HighLevelAnoDAE':
             loss_fn = torch.nn.MSELoss()
             loss_calculation_fn = lambda model, X, y_pred, y: loss_fn(y_pred, X)
             optimizer = torch.optim.Adam(params = filter(lambda param: param.requires_grad, model.parameters()), lr = learning_rate)
@@ -60,7 +60,7 @@ if __name__ == '__main__':
             loss_calculation_fn = lambda model, X, y_pred, y: loss_fn(X, y_pred[0]) + loss_fn(y_pred[1], y_pred[2])
             optimizer = torch.optim.Adam(params = filter(lambda param: param.requires_grad, model.parameters()), lr = learning_rate)
             model_trainer_class = ModelTrainer
-        case 'BiGAN' | 'DCGANDiscriminator':
+        case 'BiGAN' | 'DCGANDiscriminator' | 'DualAnoDAE':
             print('[ModelTraining] Model should be already trained. Skipping training step...')
             exit()
         case _:

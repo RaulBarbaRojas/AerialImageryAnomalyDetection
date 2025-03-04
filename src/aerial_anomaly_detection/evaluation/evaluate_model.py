@@ -37,7 +37,7 @@ if __name__ == '__main__':
     val_dataloader = DataLoader(val_dataset, batch_size = batch_size, shuffle = False, num_workers = os.cpu_count())
 
     match run_ctx.model.name:
-        case 'AutoEncoder' | 'Izi' | 'Ziz':
+        case 'AutoEncoder' | 'Izi' | 'Ziz' | 'LowLevelAnoDAE' | 'HighLevelAnoDAE':
             loss_fn = torch.nn.MSELoss()
             reconstruction_error_fn = lambda model, X, y_pred, y: loss_fn(y_pred, X).item()
         case 'DCGANDiscriminator':
@@ -48,6 +48,9 @@ if __name__ == '__main__':
         case 'f-AnoGAN':
             loss_fn = torch.nn.MSELoss()
             reconstruction_error_fn = lambda model, X, y_pred, y: loss_fn(X, y_pred[0]).item() + loss_fn(y_pred[1], y_pred[2]).item()
+        case 'DualAnoDAE':
+            loss_fn = torch.nn.MSELoss()
+            reconstruction_error_fn = lambda model, X, y_pred, y: loss_fn(y_pred[0], X).item() + loss_fn(y_pred[1], X).item()
         case _:
             raise ValueError(f'[ModelEvaluation] Unknown model "{run_ctx.model.name}"')
 

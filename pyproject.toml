@@ -1,6 +1,6 @@
 [project]
 name = "aerial_anomaly_detection"
-version = "0.1.0-dev"
+version = "1.0.0"
 authors = [
   { name="Raúl Barba Rojas", email="raul.barba@ubotica.com" },
 ]
@@ -19,6 +19,8 @@ dependencies = [
     "opencv-python==4.10.0.84",
     "tqdm==4.67.1",
     "torch==2.5.1",
+    "sphinx==8.2.3",
+    "sphinx-rtd-theme==3.0.2",
     "afml @ git+https://github.com/AlbertoVelascoMata/afml"
 ]
 

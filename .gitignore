@@ -1,3 +1,6 @@
+# Sphinx documentation
+docs/_build
+
 # AFML temp files
 .afml/
 

@@ -92,7 +92,6 @@ class HRC_WHUModelEvaluator(ModelEvaluator):
                 mask = rasterio.open(self.input_mask_folder / f'{Path(scene_id).stem}_ReferenceMask.tif').read().squeeze()[:650, ...]
                 pred_mask = np.zeros_like(mask)
                 scene_confussion_matrix = np.zeros_like(global_confussion_matrix)
-                scene_missed_predictions : List[Tuple[NDArray[np.uint8], NDArray[np.uint8], NDArray[np.uint8]]] = []
 
                 # Step 2.2: Tiling and running inference over tiles
                 for y_coord in tqdm(range(0, scene.shape[1], self.tile_y_step),

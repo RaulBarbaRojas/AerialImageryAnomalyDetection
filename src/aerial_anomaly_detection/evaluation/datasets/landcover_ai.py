@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import rasterio
 import torch
-from numpy.typing import NDArray
 from pandas import DataFrame
 from tqdm.auto import tqdm
 
@@ -74,7 +73,6 @@ class LandCoverAIModelEvaluator(ModelEvaluator):
         metric_summary_data : List[Tuple[str, int, int, int, int, float, float, float, float]] = []
         (out_pred_masks_folder := self.output_folder / 'masks' / 'pred').mkdir(exist_ok = True, parents = True)
         (out_true_masks_folder := self.output_folder / 'masks' / 'true').mkdir(exist_ok = True, parents = True)
-        (out_true_wrong_preds_folder := self.output_folder / 'wrong_predictions').mkdir(exist_ok = True, parents = True)
 
         # Step 2: Calculating the reconstruction error threshold
         reconstruction_error_threshold = self._calculate_reconstruction_error_treshold()
@@ -93,7 +91,6 @@ class LandCoverAIModelEvaluator(ModelEvaluator):
                 mask = rasterio.open(self.input_mask_folder / scene_id).read().squeeze()
                 pred_mask = np.zeros_like(mask)
                 scene_confussion_matrix = np.zeros_like(global_confussion_matrix)
-                scene_missed_predictions : List[Tuple[NDArray[np.uint8], NDArray[np.uint8], NDArray[np.uint8]]] = []
 
                 # Step 2.2: Tiling and running inference over tiles
                 for y_coord in tqdm(range(0, scene.shape[1], self.tile_y_step),
@@ -122,15 +119,6 @@ class LandCoverAIModelEvaluator(ModelEvaluator):
 
                         global_confussion_matrix[ground_truth_anomaly, pred_anomaly] += 1
                         scene_confussion_matrix[ground_truth_anomaly, pred_anomaly] += 1
-
-                        if ground_truth_anomaly != pred_anomaly and len(scene_missed_predictions) < self.num_errors_per_scene:
-                            scene_missed_predictions.append((scene[:, y_coord : y_coord + self.tile_height,
-                                                                    x_coord : x_coord + self.tile_width],
-                                                                np.full((self.tile_height, self.tile_width),
-                                                                        ground_truth_anomaly * 255).astype(np.uint8),
-                                                                np.full((self.tile_height, self.tile_width),
-                                                                        pred_anomaly * 255).astype(np.uint8),
-                                                            ))
 
                 # Step 2.3: Storing mask and metrics per scene
                 with rasterio.open(out_pred_masks_folder / scene_id,
@@ -175,29 +163,6 @@ class LandCoverAIModelEvaluator(ModelEvaluator):
                 print(f'Scene Precision: {scene_metric_data[-1][6]:.6f}')
                 print(f'Scene Recall: {scene_metric_data[-1][7]:.6f}')
                 print(f'Scene F1: {scene_metric_data[-1][8]:.6f}')
-
-                # Step 2.4: Storing missed predictions
-                if self.num_errors_per_scene > 0:
-                    _, axs = plt.subplots(self.num_errors_per_scene, 3, figsize = (20, 80))
-
-                    for idx_wrong_prediction in range(len(scene_missed_predictions)):
-                        axs[idx_wrong_prediction, 0].imshow(scene_missed_predictions[idx_wrong_prediction][0].transpose(1, 2, 0))
-                        axs[idx_wrong_prediction, 0].set_title('Patch')
-                        axs[idx_wrong_prediction, 0].axis(False)
-
-                        axs[idx_wrong_prediction, 1].imshow(scene_missed_predictions[idx_wrong_prediction][1],
-                                                            cmap = 'gray', vmin = 0, vmax = 255)
-                        axs[idx_wrong_prediction, 1].set_title('Ground Truth')
-                        axs[idx_wrong_prediction, 1].axis(False)
-
-                        axs[idx_wrong_prediction, 2].imshow(scene_missed_predictions[idx_wrong_prediction][2],
-                                                            cmap = 'gray', vmin = 0, vmax = 255)
-                        axs[idx_wrong_prediction, 2].set_title('Prediction')
-                        axs[idx_wrong_prediction, 2].axis(False)
-
-                    plt.tight_layout()
-                    plt.savefig(out_true_wrong_preds_folder / f'{scene_id}.png')
-                    plt.close()
 
             # Step 2.5: Storing metrics across scenes
             metric_summary_data.append((global_confussion_matrix[0, 0], global_confussion_matrix[0, 1],

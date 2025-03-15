@@ -69,8 +69,7 @@ if __name__ == '__main__':
                                                         tile_y_step = run_ctx.params.get('tile_y_step', 32),
                                                         input_folder = run_ctx.dataset.folder,
                                                         output_folder = run_ctx.params.out_folder,
-                                                        scene_df = pd.read_csv(Path(run_ctx.dataset.params.processed_folder) / 'scene_index.csv'),
-                                                        num_errors_per_scene = num_errors_per_scene)
+                                                        scene_df = pd.read_csv(Path(run_ctx.dataset.params.processed_folder) / 'scene_index.csv'))
         case 'HRC_WHU':
             model_evaluator = HRC_WHUModelEvaluator(model = model,
                                                     validation_dataloader = val_dataloader,
@@ -82,8 +81,7 @@ if __name__ == '__main__':
                                                     tile_y_step = run_ctx.params.get('tile_y_step', 32),
                                                     input_folder = run_ctx.dataset.folder,
                                                     output_folder = run_ctx.params.out_folder,
-                                                    scene_df = pd.read_csv(Path(run_ctx.dataset.params.processed_folder) / 'scene_index.csv'),
-                                                    num_errors_per_scene = num_errors_per_scene)
+                                                    scene_df = pd.read_csv(Path(run_ctx.dataset.params.processed_folder) / 'scene_index.csv'))
         case _:
             raise ValueError(f'[ModelEvaluation] Unknown dataset "{run_ctx.dataset.name}"')
 

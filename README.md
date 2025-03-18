@@ -190,3 +190,7 @@ Alternatively, if the user has a Linux system, then the following commands can b
 cd docs
 make html
 ```
+
+## Credit
+
+This work was carried out by Raúl Barba Rojas, together with José Luis Espinosa Aranda and Jorge Díez Peláez.

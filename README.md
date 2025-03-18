@@ -191,6 +191,12 @@ cd docs
 make html
 ```
 
+## Contributing and issues
+
+We welcome contributions from the open-source community. If you want to extend the capabilities of `aerial_anomaly_detection`, please fork the repository, develop your improvements, and submit a pull request. Please follow similar coding guidelines than the ones used, so that the project documentation remains coherent.
+
+Similarly, if a user has **problems when running the project, please make sure to create an issue on this repository** and we will try to solve it as soon as possible. **Questions, bugs, comments and suggestions for improvement are completely welcome** and we will try our best to address them in the shortest amount of time possible.
+
 ## Credit
 
 This work was carried out by Raúl Barba Rojas, together with José Luis Espinosa Aranda and Jorge Díez Peláez.

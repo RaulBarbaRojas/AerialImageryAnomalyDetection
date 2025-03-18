@@ -3,7 +3,9 @@
 ![Python3.12+](https://img.shields.io/badge/python-3.12%2B-blue)
 ![v1.0.0](https://img.shields.io/badge/version-1.0.0-blue)
 
-This repository contains all the code, documentation and related information about "Anomaly detection from satellite imagery", the Master Thesis developed by Raúl Barba Rojas with the supervision of Jorge Díez Peláez and José Luis Espinosa Aranda within the scope of the "Master Degree in Artificial Intelligence Research" offered by UIMP and AEPIA.
+![Example of anomaly detection](.github/combined.png)
+
+Welcome to the repository of "Anomaly Detection in Satellite Imagery". Here you will find all the code, documentation and related information about "Anomaly detection from satellite imagery", the Master Thesis developed by Raúl Barba Rojas with the supervision of Jorge Díez Peláez and José Luis Espinosa Aranda within the scope of the "Master Degree in Artificial Intelligence Research" offered by UIMP and AEPIA.
 
 This project has a two-fold objective and scientific contribution:
 

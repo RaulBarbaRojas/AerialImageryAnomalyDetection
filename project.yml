@@ -252,7 +252,7 @@ jobs:
         params:
           learning_rate: 0.0001
         if:
-          not_file: '{run_folder}/{model.name}/{dataset.name}/train/train_history.pkl'
+          not_file: '{run_folder}/{model.name}/{dataset.name}/train/best.pth'
 
       - name: High Level AnoDAE Training
         model: HighLevelAnoDAE
@@ -260,7 +260,7 @@ jobs:
         params:
           learning_rate: 0.0001
         if:
-          not_file: '{run_folder}/{model.name}/{dataset.name}/train/train_history.pkl'
+          not_file: '{run_folder}/{model.name}/{dataset.name}/train/best.pth'
 
   - name: Train anomaly detectors
     dataset: '{matrix.run.dataset}'
@@ -273,14 +273,13 @@ jobs:
         params:
           learning_rate: 0.0001
     if:
-      not_file: '{run_folder}/{model.name}/{dataset.name}/train/train_history.pkl'
+      not_file: '{run_folder}/{model.name}/{dataset.name}/train/best.pth'
 
   - name: Evaluation
     dataset: '{matrix.run.dataset}'
     model: '{matrix.run.model}'
     params:
       out_folder: '{run_folder}/{model.name}/{dataset.name}/inference'
-      num_errors_per_scene: 32 # Number of wrongly predicted tiles to be visualised (visual evaluation)
     steps:
       - name: Generic model evaluation
         python-module: aerial_anomaly_detection.evaluation.evaluate_model

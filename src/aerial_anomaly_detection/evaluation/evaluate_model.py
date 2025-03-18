@@ -55,8 +55,6 @@ if __name__ == '__main__':
             raise ValueError(f'[ModelEvaluation] Unknown model "{run_ctx.model.name}"')
 
     # Step 3: Setting up model evaluator
-    num_errors_per_scene = run_ctx.params.get('num_errors_per_scene', 48)
-
     match run_ctx.dataset.name:
         case 'LandCoverAI':
             model_evaluator = LandCoverAIModelEvaluator(model = model,

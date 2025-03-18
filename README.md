@@ -11,7 +11,7 @@ This project has a two-fold objective and scientific contribution:
 
 2. We propose a novel method, **DualAnoDAE**, which utilises an ensemble of two AutoEncoders with different receptive fields, to further improve the anomaly detection capabilities of the model. DualAnoDAE achieves state-of-the-art results in the two datasets used for evaluation.
 
-The results shown in the paper are fully reproducible and the project remains open-source, so that it can help the scientific community design and develop more robust and effective anomaly detection methods. While the project is open-source and uses the MIT license, please cite this work if you consider it helpful for your research.
+The results shown in the [paper](https://github.com/RaulBarbaRojas/AerialImageryAnomalyDetection/blob/main/docs/paper.pdf) are fully reproducible and the project remains open-source, so that it can help the scientific community design and develop more robust and effective anomaly detection methods. While the project is open-source and uses the MIT license, please cite this work if you consider it helpful for your research.
 
 
 ## Reproducibility
@@ -50,7 +50,7 @@ except ImportError:
 
 ### Datasets
 
-Our work uses two datasets in order to train and evaluate different anomaly detection approaches: LandCover.ai and HRC_WHU. Both datasets are deeply described in the following sections, together with the URLs that can be used for downloading them. Both datasets are publicly available for scientific research. If you use these datasets, please cite the work of the original authors as we have done in our paper.
+Our work uses two datasets in order to train and evaluate different anomaly detection approaches: LandCover.ai and HRC_WHU. Both datasets are deeply described in the following sections, together with the URLs that can be used for downloading them. Both datasets are publicly available for scientific research. If you use these datasets, please cite the work of the original authors as we have done in our [paper](https://github.com/RaulBarbaRojas/AerialImageryAnomalyDetection/blob/main/docs/paper.pdf).
 
 > **Note**
 > Although the datasets often include a previous partitioning, our work uses a random partitioning to prevent biases.
@@ -116,7 +116,7 @@ This section explains how to reproduce our results using the implemented pipelin
 
 1. **Training the models on its own**: if a user wants to train the implemented models, with the same or different settings, please refer to [Training models with aerial_anomaly_detection](#training-models-with-aerial_anomaly_detection).
 
-2. **Using the trained models to verify the evaluation results**: if the user simply wants to use the models that were trained and whose evaluation results where used for writing our scientific paper, please refer to the [Using the trained weights](#using-the-trained-weights).
+2. **Using the trained models to verify the evaluation results**: if the user simply wants to use the models that were trained and whose evaluation results where used for writing our [scientific paper](https://github.com/RaulBarbaRojas/AerialImageryAnomalyDetection/blob/main/docs/paper.pdf), please refer to the [Using the trained weights](#using-the-trained-weights).
 
 #### Training models with aerial_anomaly_detection
 
@@ -141,7 +141,7 @@ Model weights will be stored in the `runs` folder, which will have as many subfo
 
 #### Using the trained weights
 
-If the user simply wants to download pre-trained models to quickly verify the obtained evaluation results, they can be downloaded from the [official Google Shared Drive of the project](https://drive.google.com/drive/folders/196GNgbVwVNqMtXwOBfgRTKS7tM-KUBrz?usp=sharing), which is used due to the file size limit imposed by GitHub. In such drive, a `runs.zip` file is included, which must be uncomprenssed, so that the following structure is created within the main folder of this repository. The `runs.zip` file contains  the weights of all the models that were trained during our research and it allows to obtain the exact same results that can be found in our paper.
+If the user simply wants to download pre-trained models to quickly verify the obtained evaluation results, they can be downloaded from the [official Google Shared Drive of the project](https://drive.google.com/drive/folders/196GNgbVwVNqMtXwOBfgRTKS7tM-KUBrz?usp=sharing), which is used due to the file size limit imposed by GitHub. In such drive, a `runs.zip` file is included, which must be uncomprenssed, so that the following structure is created within the main folder of this repository. The `runs.zip` file contains  the weights of all the models that were trained during our research and it allows to obtain the exact same results that can be found in our [paper](https://github.com/RaulBarbaRojas/AerialImageryAnomalyDetection/blob/main/docs/paper.pdf).
 
 ```
 📂 AerialImageryAnomalyDetection/
@@ -165,7 +165,7 @@ afml run -j "Evaluation"
 
 ## Documentation
 
-The paper linked to this repository can be found in `docs/paper.pdf`. It describes the problem, existing state-of-the-art approaches and their limitations, our proposed method DualAnoDAE, as well as a comparison of results in two different datasets: LandCover.ai and HRC_WHU. See the paper or the reproducibility section of this repository to obtain further details.
+The paper linked to this repository can be found in `docs/paper.pdf`, which is also accessible in [this link](https://github.com/RaulBarbaRojas/AerialImageryAnomalyDetection/blob/main/docs/paper.pdf). It describes the problem, existing state-of-the-art approaches and their limitations, our proposed method DualAnoDAE, as well as a comparison of results in two different datasets: LandCover.ai and HRC_WHU. See the [paper](https://github.com/RaulBarbaRojas/AerialImageryAnomalyDetection/blob/main/docs/paper.pdf) or the reproducibility section of this repository to obtain further details.
 
 Besides, this project uses `Sphinx` to create its technical documentation. The code documentation contains all relevant information for developers to understand, and potentially extend, the functionalities of the `aerial_anomaly_detection` package.
 

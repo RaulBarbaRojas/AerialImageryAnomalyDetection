@@ -141,7 +141,7 @@ Model weights will be stored in the `runs` folder, which will have as many subfo
 
 #### Using the trained weights
 
-If the user simply wants to download pre-trained models to quickly verify the obtained evaluation results, they can be downloaded from the official releases of this repository. Within the release, a `runs.zip` file is attached, which must be placed according to the structure described next. Such a folder contains the weights of the models that were trained during our research and allow to obtain the exact same results that can be found in our paper.
+If the user simply wants to download pre-trained models to quickly verify the obtained evaluation results, they can be downloaded from the [official Google Shared Drive of the project](https://drive.google.com/drive/folders/196GNgbVwVNqMtXwOBfgRTKS7tM-KUBrz?usp=sharing), which is used due to the file size limit imposed by GitHub. In such drive, a `runs.zip` file is included, which must be uncomprenssed, so that the following structure is created within the main folder of this repository. The `runs.zip` file contains  the weights of all the models that were trained during our research and it allows to obtain the exact same results that can be found in our paper.
 
 ```
 📂 AerialImageryAnomalyDetection/

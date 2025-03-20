@@ -61,6 +61,8 @@ Our work uses two datasets in order to train and evaluate different anomaly dete
 
 #### Landcover.ai
 
+![LandCoverAI sample images](.github/landcover_ai_sample.png)
+
 The LandCover.ai dataset is a well-known dataset for segmentation problems. We use this dataset to train our anomaly detection models in one (randomly chosen) class, namely water, so that the they can be used to detect non-anomalous (water) and anomalous (non-water) patches. The dataset is publicly available for research (please, cite their work in case you are going to use it) and can be downloaded in the [official webpage](https://landcover.ai.linuxpolska.com/).
 
 Once downloaded, the following structure must be created (please keep the exact same names used in the diagram below, or change the corresponding variables in the `project.yml` file, so that [AFML](https://github.com/AlbertoVelascoMata/afml) can correctly find the dataset):
@@ -88,6 +90,8 @@ afml run -j "Preprocess LandCover.ai dataset"
 This code must be run in a Python CLI (with active virtual environment if required) using the main folder of this repository as the working directory. If no errors are found, a `data/processed/LandCoverAI` folder will be created with binary files containing information regarding partitioning of satellite imagery acquisitions, the (train) tiles that will be used for training the models, among other relevant aspects.
 
 #### HRC_WHU
+
+![HRC_WHU sample images](.github/hrc_whu_sample.png)
 
 HRC_WHU is a cloud segmentation dataset publicly available. It contains only two classes of pixels (cloud and non-cloud), and it was used in the same manner as the previous one to simulate an anomaly detection problem, by training the models on just one of the two classes. In this case, we selected clouds as the non-anomalous class, therefore a tile that does not contain clouds had to be detected by the anomaly detection models as an anomalous patch. The dataset is described in the [official GitHub repository](https://github.com/dr-lizhiwei/HRC_WHU), which also contains the download links.
 
